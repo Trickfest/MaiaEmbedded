@@ -1,0 +1,20 @@
+.DS_Store
+.build/
+.swiftpm/
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xcresult
+*.log
+.venv*/
+__pycache__/
+*.pyc
+# Model assets are provisioned separately; keep notices and metadata tracked.
+*.onnx
+*.pt
+*.pth
+*.mlmodel
+*.mlmodelc/
+*.mlpackage/
+Configurations/Signing.local.xcconfig
