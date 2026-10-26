@@ -17,4 +17,5 @@ __pycache__/
 *.mlmodel
 *.mlmodelc/
 *.mlpackage/
-Configurations/Signing.local.xcconfig
+Signing.local.xcconfig
+.download.*

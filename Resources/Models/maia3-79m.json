@@ -1,0 +1,21 @@
+{
+  "model": "Maia-3 79M",
+  "upstreamSource": "https://github.com/CSSLab/maia3",
+  "upstreamRevision": "1e13597c42d4858b7cfd7cfdae01e297263364b2",
+  "checkpointRepository": "https://huggingface.co/UofTCSSLab/Maia3-79M",
+  "checkpointRevision": "a107d6ceb7b298cb04ae1da4edffe2939858b894",
+  "checkpointFile": "maia3-79m.pt",
+  "checkpointBytes": 315651851,
+  "checkpointSHA256": "3fc6181d5db789b45a15305732148757ae74efa3e0028e81ba335b462dac45c2",
+  "conversionRepository": "https://github.com/Dash1971/maia-chess-android",
+  "conversionRevision": "5f6743eed5491d2e8413fe0dfd1f8ef612d0aa84",
+  "onnxFile": "maia3-79m.onnx",
+  "onnxBytes": 316034244,
+  "onnxSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "onnxOpset": 17,
+  "onnxIRVersion": 8,
+  "exportPyTorchVersion": "2.2.2",
+  "runtime": "ONNX Runtime 1.24.2 CPU",
+  "runtimeSwiftPackageRevision": "b7fb7f7dea8a2469e6335d95a61b8f36d0dc83b2",
+  "license": "AGPL-3.0-only"
+}

@@ -1,0 +1,2 @@
+MAIA_BUNDLE_ID_PREFIX = org.maiaembedded.experiment
+#include? "Signing.local.xcconfig"

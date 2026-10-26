@@ -1,0 +1,54 @@
+{
+  "coldLoadSeconds": 0.38780204160138965,
+  "coldTargetMet": true,
+  "completedAt": "2026-10-25T14:43:05Z",
+  "correctnessCases": 20,
+  "firstPredictionSeconds": 0.01949079195037484,
+  "footprintAfterLoadBytes": 791741856,
+  "footprintAfterUnloadBytes": 474433000,
+  "footprintBeforeLoadBytes": 3998344,
+  "hardware": "arm64",
+  "isSimulator": false,
+  "maxLogitError": 2.09808349609375e-05,
+  "maxProbabilityError": 4.680760009589946e-06,
+  "memoryBudgetMiB": 1024,
+  "modelSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "notes": [
+    "Experimental API; no UCI implementation.",
+    "Footprint peak is sampled between operations; allocations within an inference may be higher.",
+    "Background/resume and user-visible responsiveness require a later manual device check.",
+    "Memory budget is an explicit experiment budget, not an OS process limit."
+  ],
+  "os": "Version 27.0.1 (Build 26A434)",
+  "platform": "macOS",
+  "preCanceledRequestRejected": true,
+  "reloadCycles": 2,
+  "reloadLoadedFootprints": [
+    813778432,
+    815384064
+  ],
+  "reloadUnloadedFootprints": [
+    813762048,
+    815367680
+  ],
+  "runtime": "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization",
+  "sampledMemoryBudgetMet": true,
+  "sampledPeakFootprintBytes": 815384064,
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T14:23:02Z",
+  "sustainedFinalFootprintBytes": 474449384,
+  "sustainedFirstP95Seconds": 0.03005891665816307,
+  "sustainedInitialFootprintBytes": 794002872,
+  "sustainedLastP95Seconds": 0.030579833313822746,
+  "sustainedMemoryGrowthWithin64MiB": true,
+  "sustainedPredictions": 9330,
+  "sustainedSeconds": 1200.1278934166767,
+  "thermalStates": [
+    0
+  ],
+  "twoRatingSeconds": 0.03317354153841734,
+  "warmIterations": 100,
+  "warmMedianSeconds": 0.016583416610956192,
+  "warmP95Seconds": 0.017562708351761103,
+  "warmTargetMet": true
+}

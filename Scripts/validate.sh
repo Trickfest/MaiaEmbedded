@@ -1,7 +1,8 @@
 #!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-only
 set -euo pipefail
 cd "$(dirname "$0")/.."
 swift package dump-package > /dev/null
-swift build
+swift test
 swift build -c release
-printf '%s\n' 'Scaffold validation passed: manifest and empty-module Debug/Release builds only.' 'No inference, UCI, tests, or physical-device validation exists yet.'
+printf '%s\n' 'Non-UI package validation passed. Real-model/device evidence is separate.'

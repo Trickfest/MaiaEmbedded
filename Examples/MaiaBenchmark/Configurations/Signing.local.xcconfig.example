@@ -1,0 +1,4 @@
+// Copy to Signing.local.xcconfig for physical-device development only.
+// Keep your own team identifier and bundle prefix in that ignored local file.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+MAIA_BUNDLE_ID_PREFIX = YOUR_UNIQUE_BUNDLE_PREFIX

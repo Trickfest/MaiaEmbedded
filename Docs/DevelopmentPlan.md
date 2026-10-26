@@ -1,8 +1,11 @@
 # Development plan
 
-Status: planned; only repository setup is complete. No model benchmarks exist.
+Status: the cross-platform inference harness is implemented. Native Mac,
+simulator and physical-iPhone/iPad inference validation have completed (see
+ExperimentResults.md). Mobile lifecycle acceptance remains pending; production
+Swift/UCI APIs are not finalized.
 
-## 1. Physical-iPhone feasibility
+## 1. iPhone, iPad, and Mac feasibility
 
 Build a small native harness for a pinned Maia-3 79M ONNX model. Establish CPU
 inference before testing acceleration. Compare 5M/23M models if warranted;
@@ -15,7 +18,7 @@ en passant, promotions/underpromotions, terminal positions, current-only input,
 and reconstructed history. Define numerical tolerances before comparison;
 check legality, finite/normalized probabilities, and output orientation.
 
-Measure Release builds on a named physical iPhone/OS: cold startup and first
+Measure Release builds on named physical iPhone/iPad and Mac/OS combinations: cold startup and first
 prediction, warm median/p95, peak/sustained memory, repeat load/unload,
 background/resume, cancellation, and a 20-minute inference session including
 two-rating predictions. Keep the UI responsive. Record thermal/battery
@@ -27,7 +30,10 @@ continuing memory growth. These targets are not measured results. Choose and
 record the baseline device and memory budget before running the gate.
 
 Deliver reproducible evidence and a proceed/optimize/smaller-model/stop decision.
-Simulator or Mac results cannot substitute for the physical-iPhone gate.
+Simulator results cannot substitute for either physical mobile gate. Native Mac
+results satisfy only the Mac portion. While mobile devices are unavailable,
+finish command-line correctness checks, Mac runs, simulator runs, and unsigned
+device builds without UI automation. Leave physical access until the end.
 
 ## 2. Package and asset integration
 
@@ -64,6 +70,7 @@ publication and App Store submission require separate authorization.
 
 ## Outside this setup
 
-No application feature parity work, Bluetooth integration, training UI,
-release/tag, public visibility change, or App Store submission is authorized by
-repository creation alone.
+The user has authorized the inference experiment on all three platforms.
+Application feature parity work, Bluetooth integration, training UI, UCI,
+release/tag, public visibility change, and App Store submission remain later
+work. Source changes stay local unless a commit/push is explicitly requested.

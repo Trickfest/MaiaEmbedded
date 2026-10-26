@@ -1,0 +1,197 @@
+[
+  {
+    "elapsedSeconds": 30,
+    "predictions": 243,
+    "footprintMiB": 685
+  },
+  {
+    "elapsedSeconds": 60,
+    "predictions": 476,
+    "footprintMiB": 569
+  },
+  {
+    "elapsedSeconds": 90,
+    "predictions": 713,
+    "footprintMiB": 449
+  },
+  {
+    "elapsedSeconds": 120,
+    "predictions": 950,
+    "footprintMiB": 449
+  },
+  {
+    "elapsedSeconds": 150,
+    "predictions": 1187,
+    "footprintMiB": 449
+  },
+  {
+    "elapsedSeconds": 180,
+    "predictions": 1425,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 210,
+    "predictions": 1658,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 240,
+    "predictions": 1889,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 270,
+    "predictions": 2121,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 300,
+    "predictions": 2351,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 330,
+    "predictions": 2593,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 360,
+    "predictions": 2829,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 390,
+    "predictions": 3063,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 420,
+    "predictions": 3300,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 450,
+    "predictions": 3534,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 480,
+    "predictions": 3770,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 511,
+    "predictions": 4008,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 541,
+    "predictions": 4240,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 571,
+    "predictions": 4473,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 601,
+    "predictions": 4708,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 631,
+    "predictions": 4941,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 661,
+    "predictions": 5172,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 691,
+    "predictions": 5399,
+    "footprintMiB": 450
+  },
+  {
+    "elapsedSeconds": 721,
+    "predictions": 5632,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 751,
+    "predictions": 5861,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 781,
+    "predictions": 6095,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 811,
+    "predictions": 6337,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 841,
+    "predictions": 6574,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 871,
+    "predictions": 6804,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 901,
+    "predictions": 7031,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 932,
+    "predictions": 7255,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 962,
+    "predictions": 7489,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 992,
+    "predictions": 7721,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 1022,
+    "predictions": 7953,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 1052,
+    "predictions": 8186,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 1082,
+    "predictions": 8416,
+    "footprintMiB": 451
+  },
+  {
+    "elapsedSeconds": 1112,
+    "predictions": 8653,
+    "footprintMiB": 452
+  },
+  {
+    "elapsedSeconds": 1142,
+    "predictions": 8885,
+    "footprintMiB": 452
+  },
+  {
+    "elapsedSeconds": 1172,
+    "predictions": 9118,
+    "footprintMiB": 452
+  }
+]

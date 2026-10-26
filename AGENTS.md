@@ -2,16 +2,20 @@
 
 ## Current scope
 
-This is a private repository and SwiftPM scaffold only. Do not change visibility,
-publish releases, import weights/runtime dependencies, implement inference/UCI,
-or start the device experiment without the user's authorization for that work.
-Repository creation is complete setup, not evidence that the model works.
+This is a private repository with an authorized native inference experiment for
+iPhone, iPad, and Mac. Implement/validate the experiment with CLI checks and
+simulator builds/runs first; leave physical mobile-device access until the final
+stage when devices can be unlocked. Avoid UI automation/XCTest UI tests.
+UCI, production API finalization, publication, and visibility changes remain
+outside this experiment. Simulator/Mac results do not satisfy physical mobile
+acceptance. Commit and push authorization is separate from experiment execution.
 
 ## Layout and boundaries
 
-- `Sources/MaiaEmbedded/`: planned direct Swift prediction and sampling API.
+- `Sources/MaiaEmbedded/`: experimental direct prediction API; production API/sampling remain planned.
 - `Sources/MaiaUCI/`: planned adapter over that API; no duplicate inference path.
-- `Examples/iPhoneBenchmark/`: planned physical-device feasibility harness.
+- `Sources/MaiaBenchmarkSupport/` and `Sources/MaiaBenchmarkCLI/`: shared checks and Mac runner.
+- `Examples/MaiaBenchmark/`: native iPhone/iPad/Mac feasibility harness.
 - `Tests/`, `Resources/`, `ThirdParty/`, `Scripts/`, `Docs/`: supporting material.
 
 Reuse ChessCore for rules and validated move replay and ChessUCI for appropriate
@@ -23,14 +27,15 @@ do not redirect process-wide streams for the in-process UCI adapter.
 
 ## Validation
 
-Run `Scripts/validate.sh` for scaffold changes. It currently checks the manifest
-and Debug/Release builds only, with no tests or inference evidence. Expand it
-with real checks as implementation arrives. Local checks are required;
+Run `Scripts/validate.sh` for source changes: manifest, non-UI Swift Testing
+checks, and Release build. Run the real-model CLI benchmark and relevant app
+builds separately. Read Docs/Validation.md for reference tolerances and the
+physical acceptance checklist. Local checks are required;
 GitHub-hosted checks are optional and manual-only. Do not add automatic push,
 pull-request, or scheduled validation workflows.
 
-Physical-iPhone correctness and performance evidence must precede finalizing the
-production API. Simulator results do not satisfy the device gate. Initial
+Physical-iPhone and physical-iPad correctness/performance evidence, plus native
+Mac evidence, must precede finalizing the production API. Simulator results do not satisfy the device gate. Initial
 latency targets in the plan are proposals, not measured capabilities.
 
 ## Source and assets

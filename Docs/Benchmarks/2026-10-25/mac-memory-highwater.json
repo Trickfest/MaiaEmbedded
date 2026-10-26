@@ -1,0 +1,59 @@
+{
+  "coldLoadSeconds": 0.33297933358699083,
+  "coldTargetMet": true,
+  "completedAt": "2026-10-25T14:30:10Z",
+  "correctnessCases": 20,
+  "firstPredictionSeconds": 0.013856499921530485,
+  "footprintAfterLoadBytes": 791315824,
+  "footprintAfterUnloadBytes": 721929632,
+  "footprintBeforeLoadBytes": 4162184,
+  "hardware": "arm64",
+  "isSimulator": false,
+  "kernelMemoryBudgetMet": true,
+  "kernelPeakFootprintBytes": 795248032,
+  "maxLogitError": 2.09808349609375e-05,
+  "maxProbabilityError": 4.680760009589946e-06,
+  "memoryBudgetMiB": 1024,
+  "modelSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "notes": [
+    "Experimental API; no UCI implementation.",
+    "Footprint peak is sampled between operations; allocations within an inference may be higher.",
+    "Background/resume and user-visible responsiveness require a later manual device check.",
+    "Memory budget is an explicit experiment budget, not an OS process limit.",
+    "Cold means the first session in this process; filesystem caches were not evicted.",
+    "Kernel high-water metrics include transient allocations and the full process lifetime."
+  ],
+  "os": "Version 27.0.1 (Build 26A434)",
+  "peakResidentBytes": 834306048,
+  "platform": "macOS",
+  "preCanceledRequestRejected": true,
+  "reloadCycles": 2,
+  "reloadLoadedFootprints": [
+    756073912,
+    756712888
+  ],
+  "reloadUnloadedFootprints": [
+    756057528,
+    756696504
+  ],
+  "runtime": "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization",
+  "sampledMemoryBudgetMet": true,
+  "sampledPeakFootprintBytes": 795248032,
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T14:29:37Z",
+  "sustainedFinalFootprintBytes": 721946016,
+  "sustainedFirstP95Seconds": 0.02896995795890689,
+  "sustainedInitialFootprintBytes": 793658784,
+  "sustainedLastP95Seconds": 0.029114291537553072,
+  "sustainedMemoryGrowthWithin64MiB": true,
+  "sustainedPredictions": 235,
+  "sustainedSeconds": 30.11397562501952,
+  "thermalStates": [
+    0
+  ],
+  "twoRatingSeconds": 0.034239625092595816,
+  "warmIterations": 100,
+  "warmMedianSeconds": 0.01644399994984269,
+  "warmP95Seconds": 0.016831499990075827,
+  "warmTargetMet": true
+}

@@ -11,9 +11,21 @@ let package = Package(
     products: [
         .library(name: "MaiaEmbedded", targets: ["MaiaEmbedded"]),
         .library(name: "MaiaUCI", targets: ["MaiaUCI"]),
+        .library(name: "MaiaBenchmarkSupport", targets: ["MaiaBenchmarkSupport"]),
+        .executable(name: "maia-benchmark", targets: ["MaiaBenchmarkCLI"]),
+    ],
+    dependencies: [
+        .package(path: "../SwiftChessTools"),
+        .package(url: "https://github.com/microsoft/onnxruntime-swift-package-manager.git", exact: "1.24.2"),
     ],
     targets: [
-        .target(name: "MaiaEmbedded"),
+        .target(name: "MaiaEmbedded", dependencies: [
+            .product(name: "ChessCore", package: "SwiftChessTools"),
+            .product(name: "onnxruntime", package: "onnxruntime-swift-package-manager"),
+        ]),
         .target(name: "MaiaUCI", dependencies: ["MaiaEmbedded"]),
+        .target(name: "MaiaBenchmarkSupport", dependencies: ["MaiaEmbedded"], resources: [.copy("Resources/reference.json")]),
+        .executableTarget(name: "MaiaBenchmarkCLI", dependencies: ["MaiaBenchmarkSupport"]),
+        .testTarget(name: "MaiaEmbeddedTests", dependencies: ["MaiaEmbedded", "MaiaBenchmarkSupport"]),
     ]
 )

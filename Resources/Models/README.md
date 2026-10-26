@@ -1,5 +1,9 @@
 # Local model resources
 
-No weights are bundled. Future model acquisition/export tooling must pin source
-and checkpoint revisions and verify byte counts and SHA-256. Model files are
-ignored by Git. See [Provenance](../../Docs/Provenance.md).
+`maia3-79m.json` identifies the exact source, checkpoint, conversion and runtime.
+`Scripts/download-model.sh` downloads the 316 MB ONNX file into this directory
+and verifies its byte count and SHA-256. Weights remain ignored by Git.
+
+No download occurs during inference. The experiment app bundles this local file;
+run the helper before its Xcode build. Source/checkpoint provenance and reference
+reproduction are in [Provenance](../../Docs/Provenance.md).

@@ -1,0 +1,31 @@
+// !$*UTF8*$!
+{
+ archiveVersion = 1;
+ classes = {};
+ objectVersion = 56;
+ objects = {
+ A00000000000000000000001 = {isa = PBXBuildFile; fileRef = A00000000000000000000011; };
+ A00000000000000000000002 = {isa = PBXBuildFile; fileRef = A00000000000000000000012; };
+ A00000000000000000000003 = {isa = PBXBuildFile; productRef = A00000000000000000000081; };
+ A00000000000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaiaBenchmarkApp.swift; sourceTree = "<group>"; };
+ A00000000000000000000012 = {isa = PBXFileReference; lastKnownFileType = file; name = "maia3-79m.onnx"; path = "../../Resources/Models/maia3-79m.onnx"; sourceTree = SOURCE_ROOT; };
+ A00000000000000000000013 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MaiaBenchmark.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ A00000000000000000000014 = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configurations/Build.xcconfig; sourceTree = "<group>"; };
+ A00000000000000000000020 = {isa = PBXGroup; children = (A00000000000000000000011,A00000000000000000000012,A00000000000000000000014,A00000000000000000000021); sourceTree = "<group>"; };
+ A00000000000000000000021 = {isa = PBXGroup; name = Products; children = (A00000000000000000000013); sourceTree = "<group>"; };
+ A00000000000000000000030 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000001); runOnlyForDeploymentPostprocessing = 0; };
+ A00000000000000000000031 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000003); runOnlyForDeploymentPostprocessing = 0; };
+ A00000000000000000000032 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000002); runOnlyForDeploymentPostprocessing = 0; };
+ A00000000000000000000040 = {isa = PBXNativeTarget; buildConfigurationList = A00000000000000000000061; buildPhases = (A00000000000000000000030,A00000000000000000000031,A00000000000000000000032); buildRules = (); dependencies = (); name = MaiaBenchmark; packageProductDependencies = (A00000000000000000000081); productName = MaiaBenchmark; productReference = A00000000000000000000013; productType = "com.apple.product-type.application"; };
+ A00000000000000000000050 = {isa = PBXProject; attributes = {BuildIndependentTargetsInParallel = YES; LastSwiftUpdateCheck = 2700; LastUpgradeCheck = 2700; }; buildConfigurationList = A00000000000000000000060; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en,Base); mainGroup = A00000000000000000000020; packageReferences = (A00000000000000000000080); productRefGroup = A00000000000000000000021; projectDirPath = ""; projectRoot = ""; targets = (A00000000000000000000040); };
+ A00000000000000000000060 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000070,A00000000000000000000071); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+ A00000000000000000000061 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000072,A00000000000000000000073); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+ A00000000000000000000070 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SWIFT_VERSION = 6.0; DEBUG_INFORMATION_FORMAT = dwarf; GCC_OPTIMIZATION_LEVEL = 0; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+ A00000000000000000000071 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; SWIFT_VERSION = 6.0; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_OPTIMIZATION_LEVEL = "-O"; }; name = Release; };
+ A00000000000000000000072 = {isa = XCBuildConfiguration; baseConfigurationReference = A00000000000000000000014; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Maia Experiment"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown"; IPHONEOS_DEPLOYMENT_TARGET = 26.0; MACOSX_DEPLOYMENT_TARGET = 26.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = "$(MAIA_BUNDLE_ID_PREFIX).MaiaBenchmark"; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = auto; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx"; SUPPORTS_MACCATALYST = NO; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_EMIT_LOC_STRINGS = YES; }; name = Debug; };
+ A00000000000000000000073 = {isa = XCBuildConfiguration; baseConfigurationReference = A00000000000000000000014; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "Maia Experiment"; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools"; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortraitUpsideDown"; IPHONEOS_DEPLOYMENT_TARGET = 26.0; MACOSX_DEPLOYMENT_TARGET = 26.0; MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = "$(MAIA_BUNDLE_ID_PREFIX).MaiaBenchmark"; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = auto; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx"; SUPPORTS_MACCATALYST = NO; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_EMIT_LOC_STRINGS = YES; }; name = Release; };
+ A00000000000000000000080 = {isa = XCLocalSwiftPackageReference; relativePath = ../..; };
+ A00000000000000000000081 = {isa = XCSwiftPackageProductDependency; productName = MaiaBenchmarkSupport; };
+ };
+ rootObject = A00000000000000000000050;
+}

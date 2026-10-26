@@ -1,6 +1,7 @@
 # Architecture
 
-Status: proposed architecture; the package currently contains empty modules.
+Status: the direct inference experiment is implemented; production API and UCI
+adapter remain proposed. The experimental API must not be treated as stable.
 
 ```text
 Native Swift app          UCI consumer
@@ -25,7 +26,12 @@ Requests will include a validated position, optional validated history, and
 side-to-move/opponent ratings. Design async loading and inference, reproducible
 sampling, typed errors, cancellation/stale-result suppression, and explicit
 load/unload/shutdown. Reuse one loaded model for sequential rating comparisons.
-API names and final types remain undecided until the iPhone experiment.
+Current `MaiaExperiment*` names/types are provisional. The actor-based session
+implements verified loading, validated replay/encoding, prediction and unload.
+FP32 softmax is applied only over legal moves; value outcomes are separate.
+Objective-C temporary lifetimes are scoped per operation using autorelease pools.
+Cancellation is checked before and after inference; native kernels are not
+forcibly interrupted. Final API and sampling follow physical-device acceptance.
 
 ## UCI adapter
 
@@ -44,11 +50,11 @@ apps use it in process. No subprocess-based Python runtime is planned.
 
 ## Dependencies and ownership
 
-Start the experiment with ONNX Runtime CPU inference; benchmark acceleration if
+The experiment uses pinned ONNX Runtime 1.24.2 CPU inference; benchmark acceleration if
 needed rather than assuming Core ML or Neural Engine acceleration works. Keep
 runtime types internal. Model identity and encoding must match the checkpoint.
 
-Use ChessCore for rules, legality, FEN, and replay when the dependency is added.
+The experiment uses ChessCore for rules, legality, FEN, and replay.
 Preserve the sibling SwiftChessTools path during development. ChessUCI stays a
 formatting/parsing helper, not an engine scheduler. UI, clocks, persisted games,
 review/training workflows, and board transport belong to consuming apps.

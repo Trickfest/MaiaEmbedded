@@ -1,66 +1,77 @@
 # MaiaEmbedded
 
-A native Swift package planned for on-device Maia-3 human-move prediction on
-iOS/iPadOS and macOS, with a direct Swift API and a UCI adapter over that API.
+Experimental native Swift Maia-3 inference for iPhone, iPad, and Mac. The intended
+architecture is a direct Swift API with a UCI adapter over the same core.
 
-**Status: repository and package scaffold only.** Neither inference nor UCI
-behavior is implemented. No model or inference runtime is bundled, and no
-physical-iPhone benchmark has run. The repository is private; publication
-requires separate authorization.
+**Status:** the CPU inference experiment is implemented. Its API is provisional;
+native Mac, physical-iPad and physical-iPhone inference/performance checks pass.
+Remaining mobile lifecycle acceptance is still pending. `MaiaUCI` remains
+an empty reserved module. The repository is private and has no release. See
+[experiment results](Docs/ExperimentResults.md) for measured Mac, physical-iPhone/iPad and simulator evidence
+and the remaining acceptance checks.
 
-## Package structure
+## Layout
 
 | Path | Responsibility |
 | --- | --- |
-| `Package.swift` | SwiftPM products; initial Swift 6.2, iOS 26 and macOS 26 baseline |
-| `Sources/MaiaEmbedded/` | Direct Swift API and inference implementation, planned |
-| `Sources/MaiaUCI/` | In-process UCI adapter over the direct API, planned |
-| `Tests/` | Correctness and protocol test suites, planned |
-| `Examples/iPhoneBenchmark/` | First physical-iPhone experiment, planned |
-| `Resources/Models/` | Model provisioning policy; weights stay out of Git |
-| `ThirdParty/` | Dependency and upstream provenance policy |
-| `Scripts/validate.sh` | Package-scaffold validation only |
-| `Docs/` | Architecture, development plan, validation, and provenance |
+| `Sources/MaiaEmbedded/` | Experimental model loading, validated encoding and prediction |
+| `Sources/MaiaUCI/` | Reserved UCI adapter; not implemented |
+| `Sources/MaiaBenchmarkSupport/` | Shared reference corpus, checks and measured benchmark |
+| `Sources/MaiaBenchmarkCLI/` | Native Mac command-line benchmark |
+| `Tests/MaiaEmbeddedTests/` | Non-UI Swift Testing checks |
+| `Examples/MaiaBenchmark/` | SwiftUI iPhone/iPad/Mac experiment app |
+| `Resources/Models/` | Pinned model metadata; downloaded weights ignored |
+| `Tools/` | Isolated Python/PyTorch reference generation; not part of the app |
+| `ThirdParty/` | Upstream licenses and attribution |
+| `Scripts/` | Asset provisioning and local validation/benchmark helpers |
+| `Docs/` | Architecture, validation, provenance and remaining development plan |
 
-## First milestone
+The package uses Swift 6.2+, iOS/iPadOS 26+, macOS 26+, sibling
+`../SwiftChessTools` for ChessCore, and ONNX Runtime's official SwiftPM package
+pinned to 1.24.2. The current experiment uses the original FP32 Maia-3 79M ONNX
+export on CPU with two intra-op threads. No Core ML acceleration is enabled.
 
-Prove the pinned Maia-3 79M model on a physical iPhone using an ONNX Runtime CPU
-baseline. Compare predictions with upstream reference results and measure cold
-startup, warm latency, peak/sustained memory, lifecycle behavior, and a 20-minute
-session. Smaller models and acceleration are follow-up comparisons if needed.
-See [the development plan](Docs/DevelopmentPlan.md) for gates and scope.
-
-## Local validation
+## Run the experiment
 
 ```sh
+Scripts/download-model.sh
 Scripts/validate.sh
+Scripts/run-mac-benchmark.sh 1200
 ```
 
-This validates the manifest and builds the empty modules in Debug and Release.
-It is not an engine test, model-quality check, device benchmark, or platform
-compatibility certification. There are no implemented tests yet.
+Model provisioning is explicit and checksum-verified. Benchmark inference is
+fully local; it never fetches models. Large model/checkpoint/build files remain
+ignored. Reference fixtures are included; Python is needed only to regenerate
+them with `Scripts/prepare-reference.sh` (Python 3.13).
 
-## Architecture
+Open `Examples/MaiaBenchmark/MaiaBenchmark.xcodeproj` for the app. It bundles the
+verified local model for offline testing on iPhone, iPad and Mac. Copy its
+`Configurations/Signing.local.xcconfig.example` to the ignored local signing
+file before physical-device development. No personal team ID is tracked.
 
-Native apps call `MaiaEmbedded` directly. UCI consumers use `MaiaUCI`, which
-calls the same direct API. A future macOS `maia-uci` executable will adapt the
-same UCI implementation to standard input/output. No Python process or Flutter
-port is planned for Apple apps.
+For a booted simulator, `Scripts/run-simulator-benchmark.sh SIMULATOR_UDID 30`
+launches the app with arguments and writes a JSON report without XCTest or UI
+automation. Simulator latency is host-Mac performance, not a mobile-device gate.
+See [Validation](Docs/Validation.md) for commands, thresholds and limitations.
 
-ChessCore will supply rules and legal replay through the sibling
-`../SwiftChessTools` package when needed; no dependency is added in this scaffold.
-ChessUCI remains a command-formatting/output-parsing helper. App UI, clocks,
-storage, training workflows, and electronic-board integration are app concerns.
-See [Architecture](Docs/Architecture.md).
+## API and boundaries
 
-## Licensing and provenance
+`MaiaExperimentSession` owns one verified model session. Its async actor methods
+load, predict and unload; inputs include a validated starting FEN, legal move
+sequence, ratings and optional history. Predictions expose legal move
+probabilities and a loss/draw/win human-game outcome distribution. These are
+not Stockfish search evaluations. Cancellation suppresses results before/after
+inference; it does not promise immediate native-kernel interruption.
 
-Project-owned source is licensed under **AGPL-3.0-only**; see [LICENSE](LICENSE).
-No upstream code, model weights, or runtime binaries have been imported.
-Upstream Maia-3 source and checkpoint terms and ONNX Runtime notices must be
-verified and retained when those components are introduced. See
-[Provenance](Docs/Provenance.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+This experiment does not yet implement move sampling, UCI, game UI, clocks,
+storage, training workflows, or Bluetooth. Those remain separate steps. See
+[Architecture](Docs/Architecture.md) and [DevelopmentPlan](Docs/DevelopmentPlan.md).
 
-The intended future application is open source and App Store distributed.
-Publication and distribution-license review remain future work. This is an
-independent project, not an official CSSLab or Mobile Maia release.
+## Licensing
+
+Project-owned source is **AGPL-3.0-only**; see [LICENSE](LICENSE). Maia's encoding
+and vocabulary adaptation and model retain their upstream notices; ONNX Runtime
+and ChessCore retain their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+and [Provenance](Docs/Provenance.md). This independent project is not an official
+CSSLab or Mobile Maia release. Public publication and App Store distribution
+remain separately authorized future work.
