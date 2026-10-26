@@ -5,7 +5,8 @@ architecture is a direct Swift API with a UCI adapter over the same core.
 
 **Status:** the CPU inference experiment is implemented. Its API is provisional;
 native Mac, physical-iPad and physical-iPhone inference/performance checks pass.
-Remaining mobile lifecycle acceptance is still pending. `MaiaUCI` remains
+The user-reported mobile lifecycle checks also pass. The feasibility experiment
+is complete; production API/package work remains. `MaiaUCI` remains
 an empty reserved module. The repository is private and has no release. See
 [experiment results](Docs/ExperimentResults.md) for measured Mac, physical-iPhone/iPad and simulator evidence
 and the remaining acceptance checks.

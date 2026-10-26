@@ -8,7 +8,7 @@
   executable, and a shared SwiftUI iPhone/iPad/Mac benchmark app.
 - Add pinned model provisioning, reference regeneration, JSON performance reports,
   and headless simulator launch scripts. Native Mac and physical-iPhone/iPad
-  inference acceptance passed; mobile lifecycle checks remain pending.
+  inference acceptance passed; manual mobile lifecycle checks passed per user report.
 
 - Establish a private SwiftPM scaffold for MaiaEmbedded and its MaiaUCI adapter.
 - Record the native Apple architecture and physical-iPhone feasibility plan.

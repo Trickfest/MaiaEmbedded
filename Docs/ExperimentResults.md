@@ -5,9 +5,10 @@
 The pinned Maia-3 79M FP32 model runs correctly through the native Swift/ONNX
 integration on this Mac, a physical iPad Pro 13-inch (M4), a physical iPhone 16
 Pro Max, and iPhone/iPad simulators. All three physical platforms meet the
-proposed core inference latency and memory targets. Mobile background/resume,
-in-flight cancellation and stale-result UI checks remain open; this is not a
-production-package acceptance or release qualification. No UI automation or
+proposed core inference latency and memory targets. The user also reports that
+background/resume, cancellation during work, and restart without stale updates
+passed on both physical mobile devices. The feasibility experiment is complete;
+this is not production-package acceptance or release qualification. No UI automation or
 XCTest UI suite was used. Mac/simulator evidence is dated 2026-10-25; physical
 mobile evidence is dated 2026-10-26.
 
@@ -89,9 +90,8 @@ to this iPad and workload, not every supported iPad model.
 The user reported that the screen scrolled normally with no unusual warmth
 about three minutes into the session. That is direct manual responsiveness/
 comfort feedback, distinct from the full-run system thermal measurements.
-Battery consumption was not measured. Pre-canceled request rejection passed;
-background/resume, in-flight cancellation, and stale-result UI behavior have
-not yet been manually accepted.
+Battery consumption was not measured. Pre-canceled request rejection passed.
+The later manual lifecycle checks passed per the user report below.
 
 ## Physical iPhone — 2026-10-26
 
@@ -116,22 +116,38 @@ every iPhone model.
 
 The user reported normal scrolling and no unusual warmth early in the run.
 That manual observation is recorded separately from the system thermal data.
-Battery consumption was not measured. Mobile background/resume, in-flight
-cancellation and stale-result UI behavior are not yet manually accepted.
+Battery consumption was not measured. The later manual lifecycle checks passed
+per the user report below.
 
-## Remaining lifecycle work
+## Manual lifecycle checks — 2026-10-26
 
-Core inference correctness and sustained performance have now passed on the
-physical Mac, iPad and iPhone tested here. Finish the mobile background/resume,
-in-flight cancellation and stale-result UI checks described in
-[Validation](Validation.md). Do not treat the experimental API as production
-ready or the full package gate as complete yet.
+The user reports completing all three prescribed tests on both physical iPhone
+and iPad, with everything working as expected:
 
-Production API finalization, sampling, UCI and SwiftChessDemo integration remain
-separate later work. No commit, push, tag, public visibility change or release
-was performed for this experiment.
+- Background an active run, return, and start a fresh run.
+- Cancel during work without a completed result for the canceled run.
+- Restart afterward with new progress/results and no late updates from the old run.
+
+This is direct user-reported manual evidence, not an automated UI test or an
+independent log reconstruction of those actions. It closes the remaining
+lifecycle portion of the feasibility experiment on these devices.
+
+## Next work
+
+The model feasibility experiment has passed on the tested Mac, iPad and iPhone,
+including the user-reported mobile lifecycle checks. Proceed to package/model
+integration and the production direct Swift API design. Sampling, UCI and
+SwiftChessDemo integration remain later work. The experimental API is not yet
+production ready.
+
+The harness and benchmark evidence were committed locally as `c4d2e3d`.
+The subsequent manual lifecycle record is direct user-reported evidence.
+Commit/push synchronization is tracked in Git; no tag/release or public visibility
+change is part of this experiment.
 
 ## Evidence
+
+- [User-reported manual lifecycle results](Benchmarks/2026-10-26/manual-lifecycle.json)
 
 - [Physical iPhone report](Benchmarks/2026-10-26/iphone-physical.json)
 - [Physical iPhone environment, source hashes and user observation](Benchmarks/2026-10-26/iphone-environment.json)

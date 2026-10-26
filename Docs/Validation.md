@@ -51,7 +51,7 @@ The JSON explicitly marks simulator results. The same iOS binary supports iPhone
 and iPad. Runtime model files and the support resource bundle must be present
 in the built app.
 
-## Physical acceptance (core inference passed; lifecycle checks pending)
+## Physical feasibility acceptance (passed on tested devices)
 
 Use a Release build on the actual iPhone, iPad, and this Mac. Record device model,
 OS, model hash, runtime settings and workload. Initial targets are cold model
@@ -76,10 +76,13 @@ Manually verify background/resume and responsive controls at the final physical
 stage. Backgrounding cancels the current run; resuming permits a fresh run.
 Cancellation suppresses results but does not immediately interrupt native ONNX
 execution. Pre-canceled rejection is automated; in-flight cancellation, graceful
-background behavior, and stale-result UI suppression need physical review.
+background behavior, and stale-result UI suppression require physical review
+when behavior changes. The current experiment passed these manual checks per
+the user report.
 Do not claim battery life from these short runs. Core inference and sustained performance have passed on the tested physical
-iPhone and iPad. Remaining manual lifecycle checks are still required for full
-mobile acceptance. Keep physical identifiers/signing details
+iPhone and iPad. The user reports all prescribed manual lifecycle checks passed on both devices;
+see ExperimentResults.md and the manual lifecycle evidence JSON. This closes
+feasibility acceptance, not production-package qualification. Keep physical identifiers/signing details
 out of committed reports.
 
 With local signing configured and the device unlocked/trusted, use:
