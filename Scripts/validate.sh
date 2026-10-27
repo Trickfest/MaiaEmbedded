@@ -28,6 +28,12 @@ for destination in 'platform=macOS,arch=arm64' 'generic/platform=iOS Simulator' 
         -configuration Release -destination "$destination" -derivedDataPath .build/xcode-validation \
         -clonedSourcePackagesDirPath .build/xcode-validation/SourcePackages CODE_SIGNING_ALLOWED=NO build
 done
+# Match the explicit package-only SPI scheme without requiring the reference app's model.
+for destination in 'platform=macOS,arch=arm64' 'generic/platform=iOS'; do
+    xcodebuild -scheme MaiaUCI -configuration Release -destination "$destination" \
+        -derivedDataPath .build/xcode-spi \
+        -clonedSourcePackagesDirPath .build/xcode-spi/SourcePackages CODE_SIGNING_ALLOWED=NO build
+done
 for license in LICENSE ThirdParty/Maia3/LICENSE ThirdParty/ONNXRuntime/LICENSE; do
     [[ -f "$license" ]] || { printf 'Missing license: %s\n' "$license" >&2; exit 1; }
 done

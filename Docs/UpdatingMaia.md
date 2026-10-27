@@ -20,7 +20,8 @@ embedded packages' upstream updates. No automatic upstream refresh occurs.
    iPhone/iPad correctness, memory/performance and lifecycle acceptance for material
    inference/ownership changes.
 6. Update README, API/architecture/testing/provenance docs, DocC and CHANGELOG under
-   Unreleased. Review public API changes; there is no released API baseline yet.
+   Unreleased. Compare public API changes against `v1.0.0` or the most recent
+   released compatibility baseline; bump the semantic version appropriately.
 7. Remove obsolete ignored model files only after establishing the replacement.
    Check source archive/notices and clean checkout setup before an authorized release.
 

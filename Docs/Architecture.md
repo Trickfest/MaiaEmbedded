@@ -21,7 +21,8 @@ module and native example own measurements/reports; the engine core has no UI,
 clocks, game storage or networking. Public module catalogs provide Xcode DocC.
 
 ChessCore supplies semantic FEN validation, move replay, legality and outcomes.
-ONNX types stay internal. Preserve the sibling SwiftChessTools path dependency.
+ONNX types stay internal. SwiftChessTools resolves from its public semantic-version
+dependency; applications may supply a matching local checkout during development.
 CPU FP32, basic graph optimization and two intra-op threads are the measured
 default. Threads may be configured from 1 through 16 before session creation;
 other settings/model sizes/providers require separate measurement.

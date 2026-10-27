@@ -1,5 +1,5 @@
 {
-  "originHash" : "93d0e7c062c4c8773aef9ba7981565e305817dbffaf654769d3d317b649145f3",
+  "originHash" : "fc844ba73506c2f0e1bc396dc82044755427c25139f539c237128a0cfe5f0a03",
   "pins" : [
     {
       "identity" : "onnxruntime-swift-package-manager",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "b7fb7f7dea8a2469e6335d95a61b8f36d0dc83b2",
         "version" : "1.24.2"
+      }
+    },
+    {
+      "identity" : "swiftchesstools",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Trickfest/SwiftChessTools.git",
+      "state" : {
+        "revision" : "7dae023a7a171209134832e28d300b164aac47d9",
+        "version" : "1.4.0"
       }
     }
   ],

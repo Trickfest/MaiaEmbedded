@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.0.0 - 2026-10-27
+
+- Publish the first source-only release with remote SwiftChessTools dependency,
+  explicit Swift Package Index schemes, and DocC for both library products.
+
 - Replace the experimental types with the actor-owned MaiaSession API, typed
   configuration/requests/errors, legal human-move predictions, outcome access,
   temperature/TopP selection and reproducible random streams.
@@ -15,7 +20,7 @@
   documentation and DocC with the embedded-engine package family.
 
 - Add an experimental native FP32 Maia-3 79M CPU inference path using pinned
-  ONNX Runtime and sibling ChessCore, with verified local model loading.
+  ONNX Runtime and ChessCore, with verified local model loading.
 - Add upstream PyTorch reference fixtures, non-UI Swift tests, a Mac benchmark
   executable, and a shared SwiftUI iPhone/iPad/Mac benchmark app.
 - Add pinned model provisioning, reference regeneration, JSON performance reports,

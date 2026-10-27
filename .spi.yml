@@ -1,0 +1,10 @@
+version: 1
+builder:
+  configs:
+    - platform: ios
+      scheme: MaiaUCI
+    - platform: macos-xcodebuild
+      scheme: MaiaUCI
+    - platform: macos-spm
+      scheme: MaiaUCI
+      documentation_targets: [MaiaEmbedded, MaiaUCI]

@@ -4,7 +4,7 @@
 | --- | --- |
 | Model missing / example build cannot copy it | Run `Scripts/download-model.sh`; use its resulting local URL or bundle copy. |
 | Incompatible size/hash/schema | Restore the pinned export. Renaming another Maia model does not make it compatible. |
-| Package cannot find ChessCore | Keep SwiftChessTools as a sibling and preserve its local package path. |
+| Package cannot find ChessCore | Resolve the public SwiftChessTools dependency; remove unintended local overrides and retry package resolution. |
 | Runtime binary download fails | Resolve the pinned official ONNX SwiftPM dependency with network access; no runtime download occurs in the app. |
 | notLoaded | Await `prepare()` before direct predict/select. UCI clients await readyok. |
 | isready never completes | Check MaiaEmbedded error lines and startup timeout; no readyok is sent after failed preparation. |

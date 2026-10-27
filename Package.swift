@@ -18,7 +18,7 @@ let package = Package(
         .executable(name: "maia-soak", targets: ["MaiaSoak"]),
     ],
     dependencies: [
-        .package(path: "../SwiftChessTools"),
+        .package(url: "https://github.com/Trickfest/SwiftChessTools.git", from: "1.4.0"),
         .package(url: "https://github.com/microsoft/onnxruntime-swift-package-manager.git", exact: "1.24.2"),
     ],
     targets: [

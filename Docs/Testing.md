@@ -215,8 +215,7 @@ and live-score recheck: “Fixed; the board stays steady.” This is direct manu
 feedback, separate from the automated package/benchmark reports.
 
 Final iPhone verification is complete on the tested device. The iPad results
-follow below. Source is maintained on development branches; MaiaEmbedded remains
-private with no release.
+follow below. These reports record the pre-release development source.
 
 ### Physical iPad final regression — 2026-10-26 (America/Chicago)
 
@@ -248,8 +247,8 @@ Mac, iPhone and iPad. The package's 23 tests, Demo's 106 non-UI tests, platform
 builds, actual-model gates and device/manual evidence are recorded above. No
 UI-automation result, battery-life measurement or broader hardware qualification
 is claimed. Public distribution, release tags and App Store work remain separate
-future authorization. MaiaEmbedded remains private and unreleased; the Demo
-integration is maintained on its separate development branch.
+future authorization at this historical checkpoint. Public-release preparation
+and validation are described separately below.
 
 ### Final-review settings regression — 2026-10-26
 
@@ -266,3 +265,25 @@ behavior is unchanged; final staging removed two trailing blank lines, and the
 complete package gate passed again. The source-identity report retains both
 physical-tested source fingerprints and records the post-review fingerprints
 separately.
+
+## Public source-package validation — 1.0.0
+
+The 1.0 packaging resolves public SwiftChessTools 1.4.0 at the same commit as
+previous native/device validation. Inference source, model identity and ONNX
+Runtime 1.24.2 are unchanged. The complete local gate passed again: 23 tests
+in each of Debug, Release and Thread Sanitizer; both DocC catalogs; real UCI
+CLI, 20-request smoke, 200-request soak, 30-second benchmark and native Mac,
+simulator and unsigned iOS Release builds.
+
+A standalone source copy outside the workspace passed manifest/build/tests
+without sibling checkouts, model weights, signing files or build state. Its
+one explicitly real-model test skipped as designed. A separate client compiled
+both public products and ran real-model direct prediction/sampling plus UCI
+readiness/search/shutdown. The explicit SPI MaiaUCI scheme built for macOS and
+iOS without using the model-bundling reference-app target.
+
+These local checks used Xcode 27.1 / Swift 6.4. Swift 6.2 remains the declared
+minimum; older compiler compatibility and hosted DocC status are reported by
+SPI separately, not inferred from the local compiler. The first-release source
+archive and public tagged installation must preserve this asset-free build
+contract. GitHub-hosted validation is optional and manual-only.

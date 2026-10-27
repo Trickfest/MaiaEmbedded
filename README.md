@@ -1,5 +1,7 @@
 # MaiaEmbedded
 
+[![Swift versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FTrickfest%2FMaiaEmbedded%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/Trickfest/MaiaEmbedded) [![Supported platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FTrickfest%2FMaiaEmbedded%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/Trickfest/MaiaEmbedded)
+
 MaiaEmbedded runs Maia-3 79M in-process from an iOS, iPadOS or macOS app. A
 native Swift API returns human-move probabilities and selects moves; `MaiaUCI`
 wraps the same core for clients that already speak UCI.
@@ -7,7 +9,7 @@ wraps the same core for clients that already speak UCI.
 The package follows the StockfishEmbedded/ArasanEmbedded layout and lifecycle
 examples. Maia predicts human play at requested Lichess rating levels. Its
 probabilities and human-game outcomes have different meanings from searched
-engine evaluations. This private development package has no release.
+engine evaluations. Releases contain source; consumers build the package locally.
 
 ## Before you start
 
@@ -23,12 +25,14 @@ engine evaluations. This private development package has no release.
 
 ## Installation
 
-Keep `MaiaEmbedded` and `SwiftChessTools` as sibling checkouts. Add the local
-package in Xcode, choosing `MaiaEmbedded` for direct calls and/or `MaiaUCI` for
-line-based clients. A manifest client can use:
+In Xcode, choose **File > Add Package Dependencies**, enter
+`https://github.com/Trickfest/MaiaEmbedded.git`, and select `MaiaEmbedded` for
+direct calls and/or `MaiaUCI` for line-based clients. A manifest client can use:
 
 ```swift
-dependencies: [.package(path: "../MaiaEmbedded")],
+dependencies: [
+    .package(url: "https://github.com/Trickfest/MaiaEmbedded.git", from: "1.0.0"),
+],
 targets: [.target(name: "MyApp", dependencies: [
     .product(name: "MaiaEmbedded", package: "MaiaEmbedded"),
     .product(name: "MaiaUCI", package: "MaiaEmbedded"),
@@ -37,7 +41,9 @@ targets: [.target(name: "MyApp", dependencies: [
 
 ONNX Runtime's official SwiftPM distribution is pinned to 1.24.2. No Python,
 Flutter, Android bridge, subprocess or inference service is embedded in an app.
-There is no public package version or Swift Package Index listing to install.
+SwiftChessTools resolves from its public release; no sibling checkout is needed.
+Package builds and asset-independent tests work without model weights. SPI badges
+report its separate compatibility processing, which may initially be pending.
 
 ## Quick start with Swift Package Manager
 
@@ -94,7 +100,8 @@ are in [Examples](Docs/Examples.md) and [UCI](Docs/UCI.md).
 Scripts/download-model.sh
 ```
 
-The helper verifies byte count/SHA-256 and installs the ignored file under
+Run the helper from a clone of this repository. It verifies byte count/SHA-256
+and installs the ignored file under
 `Resources/Models`. Bundle that file in an app or place a verified copy in
 app-owned storage. The runtime independently verifies it before loading. Keep
 it stable until unload. Only the pinned 79M export is supported; changing a
@@ -122,10 +129,9 @@ restriction. Independent sessions each retain a large model; budget memory.
 
 `Examples/MaiaBenchmark` is the iPhone/iPad/Mac reference harness: direct API,
 two-rating probabilities, UCI checks and measured inference benchmarks. It is
-not a complete chess trainer. The `branch/maia-integration` development branch
-of sibling SwiftChessDemo adds Maia beside Stockfish and Arasan; it requires
-this private sibling checkout and downloaded model. No changes have been
-published to the Demo's public main branch.
+not a complete chess trainer. [SwiftChessDemo](https://github.com/Trickfest/SwiftChessDemo)
+demonstrates Maia beside Stockfish and Arasan in its Maia integration work and
+1.7 release line. Follow the Demo's setup instructions for its app-owned model.
 
 ## Testing and troubleshooting
 
@@ -152,7 +158,7 @@ GitHub-hosted validation is optional; no workflow is required or automatically r
 - [UCI](Docs/UCI.md): options and supported protocol
 - [Testing](Docs/Testing.md): local and device validation
 - [Provenance](Docs/Provenance.md), [Updating Maia](Docs/UpdatingMaia.md): upstream/assets
-- [Future features](Docs/FutureFeatures.md): optional work and separately authorized distribution
+- [Future features](Docs/FutureFeatures.md): optional model and product directions
 
 ## Licensing
 
@@ -160,5 +166,6 @@ Project-owned source is **AGPL-3.0-only**, as are the adapted upstream Maia code
 and separately provisioned model. See [LICENSE](LICENSE),
 [third-party notices](THIRD_PARTY_NOTICES.md) and [Provenance](Docs/Provenance.md).
 ONNX Runtime and SwiftChessTools retain their MIT licenses. This is independent
-work, not an official CSSLab or Mobile Maia release. The repository remains
-private; visibility, release and App Store distribution require separate authorization.
+work, not an official CSSLab or Mobile Maia release. Preserve the source/model
+licenses and their corresponding-source obligations when distributing derived
+packages or applications. App Store distribution is separate product work.

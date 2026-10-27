@@ -36,9 +36,9 @@ remain under ignored build directories, not vendored in this repository.
 
 Project: https://github.com/Trickfest/SwiftChessTools
 
-The local sibling dependency supplies chess rules and validated replay. Preserve
+The public package dependency supplies chess rules and validated replay. Preserve
 its MIT LICENSE and NOTICE.md, including its upstream attribution, in any source
 or binary distribution as applicable. It remains a separate repository.
 
 Model weights and runtime binaries are not committed. Full application
-publication/distribution compliance is separate from this private experiment.
+publication/distribution compliance remains the consuming application's responsibility.

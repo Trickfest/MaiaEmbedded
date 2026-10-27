@@ -4,8 +4,8 @@
 
 The approved direct Swift API, UCI layer, SwiftChessDemo integration, tests and
 documentation are implemented. Local gates and final verification passed on the
-tested Mac, physical iPhone and physical iPad; see Docs/Testing.md. Keep this
-repository private and do not tag or publish a release. For future changes,
+tested Mac, physical iPhone and physical iPad; see Docs/Testing.md. This package
+publishes public, source-only semantic-versioned releases. For future changes,
 complete Mac/simulator work before requesting final physical-device access.
 Avoid unattended UI automation. Commit/push still require authorization.
 
@@ -18,7 +18,8 @@ Avoid unattended UI automation. Commit/push still require authorization.
 - `Tests/`, `Resources/`, `ThirdParty/`, `Scripts/`, `Docs/`: supporting material.
 
 Reuse ChessCore for rules and validated move replay and ChessUCI for appropriate
-formatting/parsing helpers. Preserve sibling path dependencies when introduced.
+formatting/parsing helpers. Keep SwiftChessTools as a public versioned dependency
+so package consumers and Swift Package Index need no sibling checkout.
 Do not add UI, clocks, game storage, or Bluetooth transport to the engine core.
 Do not represent human-move probabilities or human-game outcome predictions as
 searched Stockfish evaluations. Prefer instance-owned state and ordered output;

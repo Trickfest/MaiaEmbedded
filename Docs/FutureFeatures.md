@@ -12,8 +12,6 @@ A full Mobile Maia-style Apple application is separate product work: clocks,
 game storage/PGN, review/variations, Maia/Stockfish comparisons, training workflows,
 accessibility/localization and optional physical-board transport.
 
-Public distribution remains deferred: choose an initial version, settle the
-consumer dependency setup, review source/model/runtime notices and corresponding
-source obligations for the intended app/package distribution, then obtain explicit
-authorization for visibility, tags/releases or App Store submission. This private
-repository has no release and is not listed on Swift Package Index.
+The 1.0 release establishes the CPU baseline and public source-package setup.
+Future releases should retain the same API/asset qualification gates and source,
+model and runtime notices. App Store distribution is separate product work.

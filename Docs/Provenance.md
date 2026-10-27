@@ -24,9 +24,10 @@ are recorded in [the model manifest](../Resources/Models/maia3-79m.json).
   verifies its declared binary archive checksum. The upstream manifest also
   resolves an extensions archive; the experiment links only the core runtime
   product, not the extensions product. [MIT license](../ThirdParty/ONNXRuntime/LICENSE).
-- **ChessCore:** the sibling SwiftChessTools checkout, under its MIT license.
-  No sibling sources are copied or changed. Record its commit with experiment
-  evidence; working-tree dependency changes invalidate a previous baseline.
+- **ChessCore:** the public SwiftChessTools package, minimum version 1.4.0,
+  under its MIT license. No sources are copied or changed. Record its resolved
+  commit with validation evidence. The original experiment used the equivalent
+  sibling checkout at the recorded commit; that history remains in its reports.
 
 ## Independent output verification
 
