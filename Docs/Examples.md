@@ -3,6 +3,7 @@
 ## Direct probabilities and two ratings
 
 ```swift
+import Foundation
 import MaiaEmbedded
 
 func compare(modelURL: URL, fen: String) async throws -> [MaiaPrediction] {
@@ -31,8 +32,14 @@ the random stream on each direct select call.
 ## One UCI search with cleanup
 
 ```swift
+import Foundation
 import MaiaEmbedded
 import MaiaUCI
+
+enum UCIExampleError: Error {
+    case timeout
+    case streamClosed
+}
 
 func oneMove(modelURL: URL) async throws -> String? {
     let (lines, continuation) = AsyncStream<String>.makeStream()
@@ -41,35 +48,54 @@ func oneMove(modelURL: URL) async throws -> String? {
     }
     do {
         try engine.start()
-        engine.sendCommand("uci")
-        for await line in lines {
-            try Task.checkCancellation()
-            if line.hasPrefix("info string MaiaEmbedded error:") {
-                throw MaiaError.runtimeFailure(line)
+        let move = try await withThrowingTaskGroup(of: String?.self) { group in
+            group.addTask {
+                engine.sendCommand("uci")
+                for await line in lines {
+                    try Task.checkCancellation()
+                    if line.hasPrefix("info string MaiaEmbedded error:") {
+                        throw MaiaError.runtimeFailure(line)
+                    }
+                    if line == "uciok" { engine.sendCommand("isready") }
+                    if line == "readyok" {
+                        engine.sendCommand("position startpos")
+                        engine.sendCommand("go depth 1")
+                    }
+                    if line.hasPrefix("bestmove ") {
+                        let move = String(line.dropFirst(9))
+                        return move == "0000" ? nil : move
+                    }
+                }
+                try Task.checkCancellation()
+                throw UCIExampleError.streamClosed
             }
-            if line == "uciok" { engine.sendCommand("isready") }
-            if line == "readyok" {
-                engine.sendCommand("position startpos")
-                engine.sendCommand("go depth 1")
+            group.addTask {
+                try await Task.sleep(for: .seconds(10))
+                throw UCIExampleError.timeout
             }
-            if line.hasPrefix("bestmove ") {
-                await engine.shutdown()
-                continuation.finish()
-                return String(line.dropFirst(9))
+            defer { group.cancelAll() }
+            guard let result = try await group.next() else {
+                throw UCIExampleError.streamClosed
             }
+            return result
         }
-        await engine.shutdown(); continuation.finish()
-        return nil
+        await engine.shutdown()
+        continuation.finish()
+        return move
     } catch {
-        await engine.shutdown(); continuation.finish()
+        await engine.shutdown()
+        continuation.finish()
         throw error
     }
 }
 ```
 
-This focused example has no startup deadline; a production owner needs a timeout
-and must observe its throwing task. SwiftChessDemo's provider session illustrates
-readiness, cancellation, deadlines and stale-request rejection. See [UCI](UCI.md).
+The 10-second deadline covers readiness and the move response. Cancellation of
+its stream task stops waiting for output; cleanup still awaits native work, so
+this is not a hard kernel-interruption deadline. A terminal `bestmove 0000`
+becomes nil; diagnostic errors are handled first. Applications should retain
+request identities when positions/screens change and observe the throwing task.
+See [UCI](UCI.md) for command and lifecycle contracts.
 
 ## Native reference app
 
@@ -77,7 +103,7 @@ Open `Examples/MaiaBenchmark/MaiaBenchmark.xcodeproj` after downloading the mode
 **Check Swift API & UCI** checks the upstream corpus, displays two rating policies
 using the same loaded session, then checks UCI legality, stop and restart.
 **Run Checks & Benchmark** measures load/warm performance. **20-Minute Session**
-retains the original paced feasibility workload. Completed reports are shareable.
+runs a paced sustained workload. Completed reports are shareable.
 Cancel/background invalidates the current operation; returning allows a fresh run.
 
 Launch with `--package-checks` for a headless API/UCI report in
@@ -93,7 +119,32 @@ swift run maia-soak --iterations 200
 Scripts/run-mac-benchmark.sh 30
 ```
 
-Both validation tools check the reference corpus and direct two-rating API first,
-then perform the requested number of legal/terminal UCI operations plus infinite
-stop and restart. They exit nonzero on failure. Use a current completion timestamp
-and successful process exit when recording evidence; an old JSON file is not proof.
+| Executable | Options and defaults |
+| --- | --- |
+| `maia-uci` | Required `--model PATH`; optional `--outcome-scores`; `--help` prints usage. |
+| `maia-smoke` | `--model PATH` defaults to `Resources/Models/maia3-79m.onnx`; `--iterations` defaults to 20; optional `--output PATH`. |
+| `maia-soak` | Same options as smoke; default iteration count is 200. Both accept 1...100,000 iterations. |
+| `maia-benchmark` | Required `--model PATH` and `--output PATH`; defaults: `--iterations 100`, `--duration 0` seconds and `--memory-mib 1024`. |
+
+Smoke and soak tools validate the reference corpus and direct two-rating API,
+then perform the requested UCI operations plus infinite stop/restart checks.
+They exit nonzero on failure. The benchmark's positive memory budget is a
+screening threshold, not an OS memory limit. Duration 0 disables its paced phase.
+
+## Benchmark support in a client
+
+```swift
+import Foundation
+import MaiaBenchmarkSupport
+
+func benchmark(modelURL: URL, reportURL: URL) async throws {
+    let report = try await MaiaBenchmark.run(
+        modelURL: modelURL, iterations: 100, sustainedSeconds: 30)
+    try report.write(to: reportURL)
+}
+```
+
+This optional library product supports reference clients and measurements.
+Regular chess applications use MaiaEmbedded and/or MaiaUCI. Keep reports in
+app-owned storage, measure physical hardware for deployment decisions, and see
+[Benchmarks](Benchmarks.md) for interpretation of latency and footprint fields.

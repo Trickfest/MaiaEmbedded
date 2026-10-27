@@ -2,30 +2,26 @@
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-27
+
+- Rewrite public guides around package installation, API use, testing and model
+  provenance; remove obsolete implementation/release sign-off records.
+- Publish physical-hardware benchmark summaries with CPU/memory specifications,
+  preserving numeric measurements and removing simulator results.
+- Expand Quick Help documentation for the direct API, UCI adapter and benchmark
+  helpers, including lifecycle, cancellation, sampling and measurement units.
+- Add a DocC guide for benchmark support and improve the runnable API examples.
+  Runtime behavior and existing public API signatures are unchanged.
+
 ## 1.0.0 - 2026-10-27
 
-- Publish the first source-only release with remote SwiftChessTools dependency,
-  explicit Swift Package Index schemes, and DocC for both library products.
-
-- Replace the experimental types with the actor-owned MaiaSession API, typed
-  configuration/requests/errors, legal human-move predictions, outcome access,
-  temperature/TopP selection and reproducible random streams.
-- Implement the restartable, instance-owned MaiaUCI adapter and maia-uci,
-  maia-smoke and maia-soak tools over the same inference core.
-- Add protocol/cancellation/restart tests, real-session lifecycle tests, CLI
-  integration and a complete local platform validation gate.
-- Extend the native reference harness with two-rating probabilities and API/UCI
-  reports; document the sibling SwiftChessDemo integration branch.
-- Align source organization, examples, testing, troubleshooting, update/provenance
-  documentation and DocC with the embedded-engine package family.
-
-- Add an experimental native FP32 Maia-3 79M CPU inference path using pinned
-  ONNX Runtime and ChessCore, with verified local model loading.
-- Add upstream PyTorch reference fixtures, non-UI Swift tests, a Mac benchmark
-  executable, and a shared SwiftUI iPhone/iPad/Mac benchmark app.
-- Add pinned model provisioning, reference regeneration, JSON performance reports,
-  and headless simulator launch scripts. Native Mac and physical-iPhone/iPad
-  inference acceptance passed; manual mobile lifecycle checks passed per user report.
-
-- Establish a private SwiftPM scaffold for MaiaEmbedded and its MaiaUCI adapter.
-- Record the native Apple architecture and physical-iPhone feasibility plan.
+- Introduce native Maia-3 79M FP32 inference with pinned ONNX Runtime and public
+  SwiftChessTools dependencies for iOS, iPadOS and macOS.
+- Provide the actor-owned MaiaSession API, typed requests/errors, legal human-move
+  probabilities, outcome access, history, temperature/TopP selection and seeded RNGs.
+- Provide a restartable in-process UCI adapter and maia-uci desktop executable
+  over the same inference core.
+- Include explicit model provisioning and checksum checks, independent PyTorch
+  reference fixtures, package tests, CLI smoke/soak tools and a native benchmark app.
+- Include architecture, examples, testing, troubleshooting, provenance and DocC
+  documentation with Swift Package Index configuration.

@@ -14,10 +14,8 @@
   "memoryBudgetMiB": 1024,
   "modelSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
   "notes": [
-    "Experimental API; no UCI implementation.",
     "Footprint peak is sampled between operations; allocations within an inference may be higher.",
-    "Background/resume and user-visible responsiveness require a later manual device check.",
-    "Memory budget is an explicit experiment budget, not an OS process limit."
+    "Memory budget is a harness screening threshold, not an OS process limit."
   ],
   "os": "Version 27.0.1 (Build 26A434)",
   "platform": "macOS",
@@ -50,5 +48,6 @@
   "warmIterations": 100,
   "warmMedianSeconds": 0.016583416610956192,
   "warmP95Seconds": 0.017562708351761103,
-  "warmTargetMet": true
+  "warmTargetMet": true,
+  "hardwareDescription": "Apple M5 Max; 18 CPU cores; 48 GiB RAM"
 }

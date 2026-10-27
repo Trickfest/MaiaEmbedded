@@ -2,21 +2,58 @@
 import Foundation
 import MaiaEmbedded
 
-/// Instance-owned UCI adapter over MaiaSession. Commands and output are ordered.
-/// start() opens the command interface; callers send uci/isready themselves.
-/// stop() closes output immediately and schedules native cleanup. shutdown()
-/// additionally awaits cleanup. A stopped instance can be started again.
+/// A restartable in-process UCI adapter over the direct Maia Swift API.
+///
+/// Commands and callbacks each preserve FIFO order on separate serial queues.
+/// The adapter does not redirect process-wide streams. Keep the engine alive,
+/// call `start()`, send `uci`, then send `isready` after `uciok`. Only `readyok`
+/// confirms that the native model loaded; hosts need error handling and deadlines.
+///
+/// One finite `go` requests a primary prediction, not iterative chess search.
+/// UCI time/depth limits do not calibrate playing strength or interrupt kernels.
+/// Swift `stop()` closes the interface; the UCI `stop` command instead completes
+/// an active request with a best move. Await `shutdown()` before releasing or
+/// replacing a model. Independent engine instances each consume model memory.
 public final class MaiaEngine: @unchecked Sendable {
+    /// An ordered, off-main-actor callback receiving one UCI output line.
+    ///
+    /// Return promptly and dispatch UI work to the main actor. Do not synchronously
+    /// block this callback waiting for a method that drains the output queue.
     public typealias LineHandler = @Sendable (String) -> Void
+    /// Initial model, rating and UCI option defaults for each start/stop generation.
     public struct Configuration: Sendable {
+        /// The pinned local model URL and CPU thread settings.
         public var model: MaiaConfiguration
+        /// Side-to-move Lichess conditioning rating in 600...2600; defaults to 1600.
         public var selfRating: Int
+        /// Opponent Lichess conditioning rating in 600...2600; defaults to 1600.
         public var opponentRating: Int
+        /// Move-selection controls; a configured seed produces an engine-owned sequence.
+        ///
+        /// Any `allowedMoves` restriction is intersected with UCI `searchmoves`.
         public var sampling: MaiaSamplingOptions
+        /// Maximum legal policy candidates to report, from 1 through 20; defaults to 1.
+        ///
+        /// Candidates are ranked by original likelihood, not sampling-adjusted probability.
         public var multiPV: Int
+        /// Whether predictions use recorded board history; defaults to false.
         public var useHistory: Bool
         /// Opt-in WDL-derived GUI scores, never searched engine evaluations.
+        /// Whether to emit optional child-position WDL compatibility scores; defaults to false.
+        ///
+        /// Enabling this adds child predictions and latency. The emitted `score cp` is
+        /// win-minus-loss in permille, not a searched centipawn position evaluation.
         public var emitsOutcomeScores: Bool
+        /// Creates initial defaults without preparing a native model.
+        ///
+        /// - Parameters:
+        ///   - model: Local model and CPU settings.
+        ///   - selfRating: Side-to-move conditioning rating.
+        ///   - opponentRating: Opposing-side conditioning rating.
+        ///   - sampling: Temperature, TopP, optional seed and move restriction.
+        ///   - multiPV: Number of one-move policy candidates to report.
+        ///   - useHistory: Whether to encode recorded positions.
+        ///   - emitsOutcomeScores: Whether to request extra outcome-derived scores.
         public init(model: MaiaConfiguration, selfRating: Int = 1600, opponentRating: Int = 1600,
                     sampling: MaiaSamplingOptions = .init(), multiPV: Int = 1,
                     useHistory: Bool = false, emitsOutcomeScores: Bool = false) {
@@ -24,6 +61,10 @@ public final class MaiaEngine: @unchecked Sendable {
             self.sampling = sampling; self.multiPV = multiPV; self.useHistory = useHistory
             self.emitsOutcomeScores = emitsOutcomeScores
         }
+        /// Checks model settings, sampling ranges, ratings and MultiPV bounds.
+        ///
+        /// The model file is verified and loaded later when readiness is requested.
+        /// - Throws: `MaiaError.invalidRequest` for an invalid setting.
         public func validate() throws {
             try model.validate(); try sampling.validate()
             guard (600...2600).contains(selfRating), (600...2600).contains(opponentRating), (1...20).contains(multiPV) else {
@@ -37,7 +78,8 @@ public final class MaiaEngine: @unchecked Sendable {
     private let handler: LineHandler
     private let control = DispatchQueue(label: "MaiaEmbedded.uci.commands")
     private let output = DispatchQueue(label: "MaiaEmbedded.uci.output")
-    // All mutable fields below are confined to control.
+    // The unchecked Sendable conformance relies on command-queue confinement
+    // for these fields; callbacks run on output and consult control before use.
     private var running = false
     private var epoch = UUID()
     private var requestID = UUID()
@@ -55,6 +97,12 @@ public final class MaiaEngine: @unchecked Sendable {
     private var heldMove: String?
     private var generator: MaiaSeededGenerator?
 
+    /// Creates a stopped adapter with its own unloaded native session.
+    ///
+    /// - Parameters:
+    ///   - configuration: Defaults restored on a fresh start after stop/shutdown.
+    ///   - lineHandler: A retained, ordered output callback; avoid strong ownership
+    ///     cycles with the engine and return promptly from each callback.
     public convenience init(configuration: Configuration, lineHandler: @escaping LineHandler) {
         let session = MaiaSession(configuration: configuration.model)
         self.init(configuration: configuration, backend: MaiaBackend(
@@ -77,7 +125,14 @@ public final class MaiaEngine: @unchecked Sendable {
             await backend.unload()
         }
     }
+    /// Whether the command interface is open, regardless of model readiness or search state.
     public var isRunning: Bool { control.sync { running } }
+    /// Opens the protocol interface; it does not send a handshake or load the model.
+    ///
+    /// Starting an already running instance is idempotent. After stop/shutdown,
+    /// start resets position/options to configured defaults. New preparation waits
+    /// for preceding native cleanup.
+    /// - Throws: A configuration validation error before opening the interface.
     public func start() throws {
         try configuration.validate()
         control.sync {
@@ -90,19 +145,39 @@ public final class MaiaEngine: @unchecked Sendable {
             readyReplies = 0; stopRequested = false; heldMove = nil
         }
     }
+    /// Enqueues one UCI command and returns without waiting for its response.
+    ///
+    /// - Parameter command: One line, optionally ending in LF or CRLF. Embedded
+    ///   newlines, NULs and input over 1 MiB are rejected. Commands on a stopped
+    ///   adapter are ignored. Invalid commands emit diagnostics and preserve valid
+    ///   position/options; native work errors are also reported through output.
     public func sendCommand(_ command: String) {
         control.async { [weak self] in self?.receive(command) }
     }
-    /// Closes this generation's command/output surface. Native inference is
-    /// cooperatively canceled; shutdown() is the awaitable resource barrier.
+    /// Closes the current command/output generation and schedules native cleanup.
+    ///
+    /// This Swift lifecycle method does not emit a final best move. Queued old
+    /// callbacks are suppressed, while a callback already executing can finish.
+    /// Native cancellation is cooperative. Use `shutdown()` to await cleanup
+    /// and callback drainage, or send the UCI `stop` command to finish a search.
     public func stop() { control.sync { close() } }
+    /// Stops the interface, then awaits native cleanup and queued callback drainage.
+    ///
+    /// Use this before releasing resources or replacing a loaded engine. A callback
+    /// that was already executing can complete before this method returns. Cleanup
+    /// waits for native work even when the caller's task has been canceled.
     public func shutdown() async {
         let cleanup = control.sync { close(); return cleanupTask }
         await cleanup?.value
         await synchronizeOutput()
     }
-    /// Waits for already submitted finite work and its callbacks. Infinite work
-    /// needs a stop command to publish bestmove, but never busy-loops inference.
+    /// Waits for submitted preparation/prediction work and an output-queue fence.
+    ///
+    /// This is a snapshot of work already submitted, not a barrier against new
+    /// concurrent commands. A completed `go infinite` prediction may still hold
+    /// its best move: send the UCI `stop` command to finish that protocol request.
+    /// Errors remain output diagnostics; this method does not throw or unload
+    /// the model. Use `shutdown()` as the resource-lifecycle barrier.
     public func waitForIdle() async {
         let tasks = control.sync { (prepareTask, searchTask, canceledSearchTail) }
         _ = try? await tasks.0?.value
@@ -128,6 +203,8 @@ public final class MaiaEngine: @unchecked Sendable {
     private func diagnostic(_ message: String) {
         emit("info string MaiaEmbedded error: " + message.replacingOccurrences(of: "\n", with: " ").replacingOccurrences(of: "\r", with: " "))
     }
+    // Retire canceled work instead of losing its cleanup dependency: a native
+    // prediction can finish after its Swift task is canceled.
     private func invalidateSearch() {
         requestID = UUID(); searchTask?.cancel(); active = false
         if let search = searchTask {
@@ -153,6 +230,8 @@ public final class MaiaEngine: @unchecked Sendable {
         }
         searchTask = nil; prepareTask = nil
     }
+    // A new protocol generation may start before old native work has drained.
+    // Chain preparation behind cleanup so replacement models do not overlap.
     private func ensurePreparation() -> Task<Void, Error> {
         if let task = prepareTask { return task }
         let barrier = cleanupTask; let backend = backend; let generation = epoch
@@ -184,6 +263,7 @@ public final class MaiaEngine: @unchecked Sendable {
     private func receive(_ raw: String) {
         guard running else { return }
         var line = raw
+        // CRLF is one Swift Character; removeLast strips either supported terminator.
         if line.hasSuffix("\r\n") { line.removeLast() } else if line.hasSuffix("\n") { line.removeLast() }
         guard line.utf8.count <= 1_048_576, !line.contains("\0"), !line.contains("\n"), !line.contains("\r") else {
             diagnostic("Expected one UCI line of at most 1 MiB."); return

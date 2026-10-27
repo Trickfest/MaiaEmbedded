@@ -16,15 +16,14 @@ embedded packages' upstream updates. No automatic upstream refresh occurs.
    reproduces the checked-in fixtures for the current baseline, not byte-identical
    ONNX exports from a different PyTorch version.
 5. Run `Scripts/validate.sh`, repeat consumer tests and benchmark changed precision,
-   execution provider, thread count or runtime behavior. Repeat final physical
+   execution provider, thread count or runtime behavior. Repeat physical
    iPhone/iPad correctness, memory/performance and lifecycle acceptance for material
    inference/ownership changes.
 6. Update README, API/architecture/testing/provenance docs, DocC and CHANGELOG under
-   Unreleased. Compare public API changes against `v1.0.0` or the most recent
-   released compatibility baseline; bump the semantic version appropriately.
+   Unreleased. Compare public API changes against the most recent compatible
+   release and bump the semantic version appropriately.
 7. Remove obsolete ignored model files only after establishing the replacement.
    Check source archive/notices and clean checkout setup before an authorized release.
 
-Release tags, public visibility, App Store distribution and Swift Package Index
-submission remain separately authorized work. Do not turn documentation changes
-into patch releases. GitHub-hosted checks remain optional/manual-only.
+Keep source-only releases reproducible with pinned assets and retained notices.
+GitHub-hosted checks remain optional/manual-only.

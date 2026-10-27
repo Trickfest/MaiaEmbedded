@@ -7,4 +7,4 @@ builder:
       scheme: MaiaUCI
     - platform: macos-spm
       scheme: MaiaUCI
-      documentation_targets: [MaiaEmbedded, MaiaUCI]
+      documentation_targets: [MaiaEmbedded, MaiaUCI, MaiaBenchmarkSupport]

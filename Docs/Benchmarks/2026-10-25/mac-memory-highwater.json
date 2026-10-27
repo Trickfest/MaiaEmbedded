@@ -16,10 +16,8 @@
   "memoryBudgetMiB": 1024,
   "modelSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
   "notes": [
-    "Experimental API; no UCI implementation.",
     "Footprint peak is sampled between operations; allocations within an inference may be higher.",
-    "Background/resume and user-visible responsiveness require a later manual device check.",
-    "Memory budget is an explicit experiment budget, not an OS process limit.",
+    "Memory budget is a harness screening threshold, not an OS process limit.",
     "Cold means the first session in this process; filesystem caches were not evicted.",
     "Kernel high-water metrics include transient allocations and the full process lifetime."
   ],
@@ -55,5 +53,6 @@
   "warmIterations": 100,
   "warmMedianSeconds": 0.01644399994984269,
   "warmP95Seconds": 0.016831499990075827,
-  "warmTargetMet": true
+  "warmTargetMet": true,
+  "hardwareDescription": "Apple M5 Max; 18 CPU cores; 48 GiB RAM"
 }

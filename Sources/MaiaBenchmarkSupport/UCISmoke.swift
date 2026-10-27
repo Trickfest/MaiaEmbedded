@@ -8,11 +8,23 @@ import ChessCore
 public final class MaiaLineCapture: @unchecked Sendable {
     private let lock = NSLock()
     private var storage: [String] = []
+    /// Creates an empty, lock-protected output buffer.
     public init() {}
+    /// Appends one output line; concurrent calls are serialized by the buffer lock.
     public func append(_ line: String) { lock.lock(); defer { lock.unlock() }; storage.append(line) }
+    /// Returns captured lines in append order and clears the buffer atomically.
     public func take() -> [String] { lock.lock(); defer { lock.unlock() }; let result = storage; storage.removeAll(); return result }
 }
+/// Real-model protocol smoke/soak checks shared by the reference tools.
 public enum MaiaUCIChecks {
+    /// Checks readiness, legal/terminal moves, held infinite results and stop/restart.
+    ///
+    /// - Parameters:
+    ///   - modelURL: Local URL of the pinned model export.
+    ///   - iterations: Finite requests, from 1 through 100,000, cycling the corpus.
+    /// - Throws: `MaiaError` for failed protocol assertions or invalid counts, native
+    ///   model errors, or `CancellationError`. The engine is shut down on either
+    ///   success or failure.
     public static func run(modelURL: URL, iterations: Int) async throws {
         guard (1...100_000).contains(iterations) else { throw MaiaError.invalidRequest("Iterations must be 1...100000.") }
         let capture = MaiaLineCapture()

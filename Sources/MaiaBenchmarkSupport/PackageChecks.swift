@@ -2,22 +2,40 @@
 import Foundation
 import MaiaEmbedded
 
-/// Sanitized, portable evidence for the final package API/UCI verification.
+/// Portable numeric summary of direct-API and UCI validation checks.
 public struct MaiaPackageReport: Codable, Sendable {
+    /// JSON report format version.
     public let schemaVersion: Int
+    /// Runtime platform name.
     public let platform: String
+    /// Generic hardware product identifier or host architecture.
     public let hardware: String
+    /// Model precision, runtime version and CPU configuration.
     public let runtime: String
+    /// Validation start timestamp.
     public let startedAt: Date
+    /// Successful completion timestamp.
     public let completedAt: Date
+    /// Operating-system version used for this run.
     public let os: String
+    /// Whether the run used a simulator rather than physical hardware.
     public let isSimulator: Bool
+    /// SHA-256 of the verified model export.
     public let modelSHA256: String
+    /// Number of independently generated reference cases verified.
     public let referenceCases: Int
+    /// Largest absolute policy/value-logit error against reference data.
     public let maxLogitError: Double
+    /// Largest absolute legal-policy probability error against reference data.
     public let maxProbabilityError: Double
+    /// Requested finite UCI operations, separate from stop/restart checks.
     public let uciRequests: Int
+    /// Two-rating policy previews generated sequentially from one loaded session.
     public let ratings: [MaiaRatingPreview]
+    /// Writes this report atomically as sorted JSON with ISO-8601 dates.
+    ///
+    /// - Parameter url: Destination file URL; missing parent directories are created.
+    /// - Throws: File-system or JSON encoding errors.
     public func write(to url: URL) throws {
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
@@ -25,15 +43,32 @@ public struct MaiaPackageReport: Codable, Sendable {
         try encoder.encode(self).write(to: url, options: .atomic)
     }
 }
+/// A rating-conditioned sample and likelihood summary for the shared preview line.
 public struct MaiaRatingPreview: Codable, Sendable {
+    /// Conditioning rating for the preview position's side to move.
     public let rating: Int
+    /// Conditioning rating for the opponent.
     public let opponentRating: Int
+    /// Up to five highest-likelihood coordinate-UCI moves, in policy rank order.
     public let moves: [String]
+    /// Original probabilities for all legal moves, not just the displayed top five.
     public let probabilities: [String: Double]
+    /// Seeded sampled move, which may differ from the top policy candidate.
     public let selectedMove: String?
 }
+/// Combined direct-API, rating-preview and UCI correctness checks for reference clients.
 public enum MaiaPackageChecks {
-    /// Runs sequentially to avoid retaining multiple native models on mobile.
+    /// Checks the reference corpus, previews two ratings and exercises the UCI adapter.
+    ///
+    /// - Parameters:
+    ///   - modelURL: A local pinned model export; no download is performed.
+    ///   - uciRequests: Finite UCI operations, from 1 through 100,000; defaults to 20.
+    /// - Returns: A completed report, including policy previews and numeric errors.
+    /// - Throws: Reference, model, protocol or cancellation errors.
+    ///
+    /// Direct and UCI sessions run sequentially to avoid overlapping native model
+    /// memory. The check unloads its sessions on success and failure. It does not
+    /// drive UI or measure interactive responsiveness.
     public static func run(modelURL: URL, uciRequests: Int = 20) async throws -> MaiaPackageReport {
         let started = Date()
         let session = MaiaSession(configuration: .init(modelURL: modelURL))

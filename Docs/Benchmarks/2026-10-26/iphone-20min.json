@@ -1,0 +1,57 @@
+{
+  "coldLoadSeconds": 0.43087224988266826,
+  "coldTargetMet": true,
+  "completedAt": "2026-10-26T13:34:43Z",
+  "correctnessCases": 20,
+  "firstPredictionSeconds": 0.026008374989032745,
+  "footprintAfterLoadBytes": 470861952,
+  "footprintAfterUnloadBytes": 172623832,
+  "footprintBeforeLoadBytes": 13567648,
+  "hardware": "iPhone17,2",
+  "isSimulator": false,
+  "kernelMemoryBudgetMet": true,
+  "kernelPeakFootprintBytes": 791021912,
+  "maxLogitError": 2.288818359375e-05,
+  "maxProbabilityError": 4.948778157154443e-06,
+  "memoryBudgetMiB": 1024,
+  "modelSHA256": "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "notes": [
+    "Footprint peak is sampled between operations; allocations within an inference may be higher.",
+    "Memory budget is a harness screening threshold, not an OS process limit.",
+    "Cold means the first session in this process; filesystem caches were not evicted.",
+    "Kernel high-water metrics include transient allocations and the full process lifetime."
+  ],
+  "os": "Version 27.0.1 (Build 24A446)",
+  "peakResidentBytes": 824147968,
+  "platform": "iOS/iPadOS",
+  "preCanceledRequestRejected": true,
+  "reloadCycles": 2,
+  "reloadLoadedFootprints": [
+    432736360,
+    423889000
+  ],
+  "reloadUnloadedFootprints": [
+    160892864,
+    165103600
+  ],
+  "runtime": "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization",
+  "sampledMemoryBudgetMet": true,
+  "sampledPeakFootprintBytes": 472500352,
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T13:14:40Z",
+  "sustainedFinalFootprintBytes": 461097088,
+  "sustainedFirstP95Seconds": 0.052117083221673965,
+  "sustainedInitialFootprintBytes": 464324736,
+  "sustainedLastP95Seconds": 0.051277166698127985,
+  "sustainedMemoryGrowthWithin64MiB": true,
+  "sustainedPredictions": 7751,
+  "sustainedSeconds": 1200.116951458156,
+  "thermalStates": [
+    0
+  ],
+  "twoRatingSeconds": 0.03283462510444224,
+  "warmIterations": 100,
+  "warmMedianSeconds": 0.016323166666552424,
+  "warmP95Seconds": 0.016793499933555722,
+  "warmTargetMet": true
+}

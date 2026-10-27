@@ -26,6 +26,13 @@ native cleanup and callback drainage. Neither method sends a final bestmove.
 `start()` can reopen the same object; new preparation waits behind old cleanup.
 `quit` closes the protocol; the CLI also exits without requiring stdin EOF.
 
+`waitForIdle()` waits for already submitted preparation/prediction work and
+callbacks. It is a snapshot, not a fence against new concurrent commands. An
+infinite prediction can finish its computation while retaining an active protocol
+request; send UCI `stop` to release that best move. `waitForIdle()` does not unload
+the model or throw readiness errors. Inspect diagnostic lines and enforce a
+response deadline; see the complete [host example](Examples.md).
+
 A valid position or ucinewgame invalidates old search results immediately.
 The host should ordinarily stop/wait for bestmove before issuing a new position;
 replacement intentionally suppresses the old request's bestmove. Invalid
@@ -58,14 +65,14 @@ a final FEN alone cannot reconstruct them. CRLF or LF terminators are accepted;
 embedded newlines, NULs and lines above 1 MiB are rejected.
 
 Finite `go` arguments movetime, depth, nodes, mate, wtime/btime, winc/binc and
-movestogo all request **one prediction**, since Maia has no iterative search.
+movestogo all request **one primary policy prediction**, since Maia has no iterative search.
 They do not set playing strength or impose a hard kernel deadline. Integer
 limits must be positive; clock/increment values may be zero. `searchmoves`
 restricts selection/PV candidates to its intersection with legal moves
 and any caller-configured allowedMoves; an empty
 intersection fails with a diagnostic and bestmove 0000.
 
-`go infinite` performs one prediction and holds bestmove until stop; it does not
+`go infinite` performs one primary prediction and holds bestmove until stop; it does not
 busy-loop. Ponder/ponderhit are rejected. Unsupported go arguments are rejected.
 Terminal positions emit bestmove 0000. A failed started request emits a diagnostic
 and one bestmove 0000; hosts should distinguish failure from terminal status.

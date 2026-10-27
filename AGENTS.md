@@ -1,51 +1,41 @@
 # MaiaEmbedded guidance
 
-## Current scope
-
-The approved direct Swift API, UCI layer, SwiftChessDemo integration, tests and
-documentation are implemented. Local gates and final verification passed on the
-tested Mac, physical iPhone and physical iPad; see Docs/Testing.md. This package
-publishes public, source-only semantic-versioned releases. For future changes,
-complete Mac/simulator work before requesting final physical-device access.
-Avoid unattended UI automation. Commit/push still require authorization.
+MaiaEmbedded is a public source package for native Maia-3 inference with a direct
+Swift API and an in-process UCI adapter. Keep documentation written for package
+consumers; record release history in CHANGELOG rather than implementation plans
+or sign-off logs.
 
 ## Layout and boundaries
 
-- `Sources/MaiaEmbedded/`: direct Swift inference, prediction and sampling API.
-- `Sources/MaiaUCI/`: restartable instance-owned adapter over that API; no duplicate inference path.
-- `Sources/MaiaBenchmarkSupport/` and `Sources/MaiaBenchmarkCLI/`: shared checks and Mac runner.
-- `Examples/MaiaBenchmark/`: native iPhone/iPad/Mac feasibility harness.
+- `Sources/MaiaEmbedded/`: inference, predictions, sampling and model lifecycle.
+- `Sources/MaiaUCI/`: the instance-owned adapter over the same inference API.
+- `Sources/MaiaBenchmarkSupport/` and command-line targets: checks and measurements.
+- `Examples/MaiaBenchmark/`: the iPhone/iPad/Mac reference app.
 - `Tests/`, `Resources/`, `ThirdParty/`, `Scripts/`, `Docs/`: supporting material.
 
-Reuse ChessCore for rules and validated move replay and ChessUCI for appropriate
-formatting/parsing helpers. Keep SwiftChessTools as a public versioned dependency
-so package consumers and Swift Package Index need no sibling checkout.
-Do not add UI, clocks, game storage, or Bluetooth transport to the engine core.
-Do not represent human-move probabilities or human-game outcome predictions as
-searched Stockfish evaluations. Prefer instance-owned state and ordered output;
-do not redirect process-wide streams for the in-process UCI adapter.
+Use public versioned dependencies so package consumers and SPI need no sibling
+checkout. Keep chess rules in ChessCore and app policy/UI outside the engine.
+Human-move and outcome probabilities must not be described as searched engine
+evaluations. Preserve instance-owned state and ordered output; the UCI adapter
+must not redirect process-wide streams.
 
-## Validation
+## Validation and documentation
 
-Run `Scripts/validate.sh` for source changes: manifest, non-UI Swift Testing
-checks, and Release build. Run the real-model CLI benchmark and relevant app
-builds separately. Read Docs/Testing.md for reference tolerances and the
-physical acceptance checklist. Local checks are required;
-GitHub-hosted checks are optional and manual-only. Do not add automatic push,
-pull-request, or scheduled validation workflows.
+Run `Scripts/validate.sh` for source changes. It covers tests, model checks,
+CLI/soak, DocC and platform builds; see Docs/Testing.md. Inference, memory or
+lifecycle changes also need relevant physical iPhone/iPad and native Mac checks.
+Do Mac/simulator work first. Avoid unattended UI automation. For documentation
+changes, check links, DocC and benchmark data consistency; do not create a patch
+release solely for documentation. Hosted checks remain optional/manual-only.
 
-Physical-iPhone and physical-iPad correctness/performance evidence, plus native
-Mac evidence, must precede finalizing the production API. Simulator results do not satisfy the device gate. The original feasibility evidence is historical; final integration verification is separate.
+Published benchmark results describe physical hardware with CPU/memory/runtime
+settings. Keep measurements and limitations clear, without personal machine
+references, conversation transcripts or release-approval records.
 
 ## Source and assets
 
-Project-owned source uses AGPL-3.0-only SPDX headers. Preserve all upstream
-notices. Pin upstream revisions, export tools, checkpoint identities, hashes,
-and runtime versions before introducing them. Keep model files, downloaded
-binaries, signing state, DerivedData, and build products out of Git. No secrets
-or personal Apple team identifiers belong in this repository.
-
-Update README, architecture/validation/provenance docs, and CHANGELOG under
-Unreleased for significant changes. Retire completed development plans after
-useful operating guidance has moved into current docs. Commits, pushes, tags,
-releases, and visibility changes require authorization for the relevant work.
+Owned source uses AGPL-3.0-only SPDX headers. Preserve upstream notices and pin
+source/checkpoint/export/runtime identities. Keep downloaded weights, binaries,
+signing state and generated output out of Git. Update current public guides and
+CHANGELOG for significant changes. Commits, pushes, tags, releases and visibility
+changes require authorization for the relevant work.

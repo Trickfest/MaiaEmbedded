@@ -7,14 +7,30 @@ import OnnxRuntimeBindings
 /// Cancellation suppresses results before/after a run; it does not promise to
 /// interrupt an ONNX kernel. Unload waits behind an in-flight run.
 public actor MaiaSession {
+    /// SHA-256 of the single supported Maia-3 79M FP32 ONNX export.
     public static let modelSHA256 = "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010"
+    /// Expected model file size in bytes, verified before opening the runtime session.
     public static let modelByteCount = 316_034_244
     private var environment: ORTEnv?
     private var session: ORTSession?
+    /// Configuration value used to create this session.
     public typealias Configuration = MaiaConfiguration
+    /// The immutable configuration snapshot supplied at initialization.
     public let configuration: Configuration
+    /// Creates an unloaded session without validating or opening the model.
+    ///
+    /// - Parameter configuration: A local model URL and CPU thread settings. Each
+    ///   prepared session owns a separate native model and its associated memory.
     public init(configuration: Configuration) { self.configuration = configuration }
+    /// Whether this actor currently retains a successfully prepared native session.
     public var isReady: Bool { session != nil }
+    /// Verifies and loads the pinned model, or reuses the already prepared session.
+    ///
+    /// Call with `try await` from outside the actor. Validation checks the local file
+    /// URL, thread range, byte count, SHA-256 and required ONNX tensor names. Failure
+    /// while loading leaves the session unloaded so the asset can be fixed and retried.
+    /// - Throws: `MaiaError` for invalid resources/configuration/runtime failures, or
+    ///   `CancellationError` at cooperative checkpoints. No download is performed.
     public func prepare() throws { try load(modelURL: configuration.modelURL) }
 
     private func load(modelURL: URL) throws {
@@ -58,18 +74,43 @@ public actor MaiaSession {
         environment = env; session = loaded
     }
 
+    /// Releases the native model and permits preparation again with the same configuration.
+    ///
+    /// Call with `await` from outside the actor. Actor serialization waits for native
+    /// work already executing. Cleanup itself does not check task cancellation. Native
+    /// allocators may retain pages after unload, so process footprint can stay elevated.
     public func unload() { autoreleasepool { session = nil; environment = nil } }
 
+    /// Predicts legal move likelihoods and human-game outcomes for a validated line.
+    ///
+    /// - Parameter request: Root FEN, recorded legal moves, history mode and ratings.
+    /// - Returns: The original model policy, or a known outcome with an empty policy
+    ///   for an automatic terminal position. Preparation is required in either case.
+    /// - Throws: `MaiaError` for an unprepared session, invalid input or native/model
+    ///   failure; `CancellationError` before or after native work. Cancellation cannot
+    ///   interrupt an ONNX kernel. Hosts must reject results for replaced requests.
     public func predict(_ request: MaiaRequest) throws -> MaiaPrediction {
         try translateErrors { try autoreleasepool { try predictWithinPool(request) } }
     }
 
+    /// Predicts once and selects a move using the supplied sampling settings.
+    ///
+    /// - Parameters:
+    ///   - request: Position/history and side-relative conditioning ratings.
+    ///   - options: Selection controls; a supplied seed starts a fresh per-call stream.
+    /// - Returns: A move with its unchanged prediction and adjusted distribution.
+    ///   Terminal positions return a nil move.
+    /// - Throws: The validation, model and cancellation errors of `predict(_:)` and
+    ///   sampling errors from `MaiaSampler`. To retain an RNG stream, call `predict(_:)`
+    ///   then the sampler overload accepting a generator.
     public func selectMove(_ request: MaiaRequest, options: MaiaSamplingOptions = .init()) throws -> MaiaSelection {
         try options.validate()
         let prediction = try predict(request)
         return try MaiaSampler.select(from: prediction, options: options)
     }
 
+    // Preserve cancellation as cancellation so hosts can suppress superseded work
+    // without misclassifying it as a model/runtime failure.
     private func translateErrors<T>(_ body: () throws -> T) throws -> T {
         do { return try body() }
         catch let error as CancellationError { throw error }
@@ -100,6 +141,7 @@ public actor MaiaSession {
             guard data.count == expected * MemoryLayout<Float>.size else {
                 throw MaiaError.incompatibleModel("Unexpected \(name) tensor size.")
             }
+            // ORT owns the buffer; decoding must not assume Swift Float alignment.
             return data.withUnsafeBytes { bytes in
                 (0..<expected).map { bytes.loadUnaligned(fromByteOffset: $0 * 4, as: Float.self) }
             }

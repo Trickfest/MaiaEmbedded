@@ -1,6 +1,6 @@
 # Provenance and model assets
 
-## Experiment inputs
+## Source and model identities
 
 The exact source/checkpoint/export identities, byte counts and SHA-256 values
 are recorded in [the model manifest](../Resources/Models/maia3-79m.json).
@@ -22,12 +22,11 @@ are recorded in [the model manifest](../Resources/Models/maia3-79m.json).
 - **Apple runtime:** Microsoft's official onnxruntime-swift-package-manager
   1.24.2, source commit `b7fb7f7dea8a2469e6335d95a61b8f36d0dc83b2`. SwiftPM
   verifies its declared binary archive checksum. The upstream manifest also
-  resolves an extensions archive; the experiment links only the core runtime
+  resolves an extensions archive; this package links only the core runtime
   product, not the extensions product. [MIT license](../ThirdParty/ONNXRuntime/LICENSE).
 - **ChessCore:** the public SwiftChessTools package, minimum version 1.4.0,
   under its MIT license. No sources are copied or changed. Record its resolved
-  commit with validation evidence. The original experiment used the equivalent
-  sibling checkout at the recorded commit; that history remains in its reports.
+  commit when comparing measurements or updating the dependency.
 
 ## Independent output verification
 
@@ -36,7 +35,7 @@ original checkpoint through upstream's weights-only PyTorch loading. It emits
 20 deterministic position/rating/history cases with input byte hashes, legal
 move sets, terminal flags, raw legal move/value logits and probabilities.
 It also compares every ONNX output head against the original PyTorch model.
-The reference environment is Python 3.13, PyTorch 2.9.1, numpy 2.2.6, Python
+The reference-generation environment uses Python 3.13, PyTorch 2.9.1, numpy 2.2.6, Python
 ONNX Runtime 1.24.2 and python-chess 1.999; all installed versions are locked in
 `Tools/requirements-reference.txt`. It runs on the Mac only, never inside an app.
 The generated JSON records tool versions and measured cross-runtime error.

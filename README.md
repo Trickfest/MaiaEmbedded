@@ -6,8 +6,7 @@ MaiaEmbedded runs Maia-3 79M in-process from an iOS, iPadOS or macOS app. A
 native Swift API returns human-move probabilities and selects moves; `MaiaUCI`
 wraps the same core for clients that already speak UCI.
 
-The package follows the StockfishEmbedded/ArasanEmbedded layout and lifecycle
-examples. Maia predicts human play at requested Lichess rating levels. Its
+Maia predicts human play at requested Lichess rating levels. Its
 probabilities and human-game outcomes have different meanings from searched
 engine evaluations. Releases contain source; consumers build the package locally.
 
@@ -19,9 +18,9 @@ engine evaluations. Releases contain source; consumers build the package locally
   validation covers Apple silicon and arm64 simulators. Intel is unqualified.
 - **Model:** explicitly provision the pinned 316 MB FP32 ONNX export. The
   library accepts a caller-owned local URL and never downloads during inference.
-- **Memory:** physical feasibility runs peaked around 754–756 MiB on the tested
+- **Memory:** physical-device measurements peaked around 754–756 MiB on the tested
   mobile devices. Supporting older devices needs additional evidence. See
-  [measured results](Docs/ExperimentResults.md).
+  [measured results](Docs/Benchmarks.md).
 
 ## Installation
 
@@ -31,7 +30,7 @@ direct calls and/or `MaiaUCI` for line-based clients. A manifest client can use:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Trickfest/MaiaEmbedded.git", from: "1.0.0"),
+    .package(url: "https://github.com/Trickfest/MaiaEmbedded.git", from: "1.1.0"),
 ],
 targets: [.target(name: "MyApp", dependencies: [
     .product(name: "MaiaEmbedded", package: "MaiaEmbedded"),
@@ -66,7 +65,7 @@ print(selection.move as Any)
 await session.unload()
 ```
 
-A UI owner should keep and observe the throwing task, present errors and unload
+Applications should observe the throwing task, present errors and unload
 on success **and** failure. See [Examples](Docs/Examples.md) for that pattern and
 [Architecture](Docs/Architecture.md) for all input, sampling and outcome contracts.
 
@@ -77,22 +76,19 @@ import MaiaEmbedded
 import MaiaUCI
 
 let engine = MaiaEngine(configuration: .init(model: .init(modelURL: localModelURL))) {
-    line in print(line)
+    line in print(line) // Forward to the host's ordered protocol handling.
 }
 try engine.start()
 engine.sendCommand("uci")
-engine.sendCommand("isready")
-// After readyok:
-engine.sendCommand("position startpos moves e2e4")
-engine.sendCommand("go movetime 1000")
-// After bestmove, or when leaving the feature:
-await engine.shutdown()
 ```
 
-Keep the engine alive, wait for `uciok`/`readyok`, handle errors/deadlines, and
-return promptly from its ordered callback. `start()` opens the protocol; it does
-not send a handshake or load the model. Full examples and protocol limitations
-are in [Examples](Docs/Examples.md) and [UCI](Docs/UCI.md).
+Keep the engine alive and drive the sequence from its output callback: after
+`uciok`, send `isready`; after `readyok`, send a `position` command followed by
+`go`. Observe the resulting `bestmove` before changing position. When the feature
+closes, `await engine.shutdown()` to drain callbacks and release native resources.
+`start()` opens the protocol; it does not load the model. The callback runs off
+the main actor and should return promptly. A complete example with a response
+deadline and cleanup on failure is in [Examples](Docs/Examples.md).
 
 ## Runtime assets
 
@@ -130,8 +126,7 @@ restriction. Independent sessions each retain a large model; budget memory.
 `Examples/MaiaBenchmark` is the iPhone/iPad/Mac reference harness: direct API,
 two-rating probabilities, UCI checks and measured inference benchmarks. It is
 not a complete chess trainer. [SwiftChessDemo](https://github.com/Trickfest/SwiftChessDemo)
-demonstrates Maia beside Stockfish and Arasan in its Maia integration work and
-1.7 release line. Follow the Demo's setup instructions for its app-owned model.
+demonstrates Maia beside Stockfish and Arasan. Follow the Demo's setup instructions for its app-owned model.
 
 ## Testing and troubleshooting
 
@@ -144,10 +139,9 @@ swift run maia-uci --model Resources/Models/maia3-79m.onnx
 
 The local gate covers Debug/Release/Thread Sanitizer tests, actual-model
 reference/API/UCI checks, CLI protocol, soak, benchmark and unsigned platform
-builds. Final verification passed on the tested native Mac, physical iPhone 16
-Pro Max and physical iPad Pro 13-inch (M4), including user-reported mobile
-gameplay/layout/lifecycle checks.
-[Testing](Docs/Testing.md) describes evidence and manual checks;
+builds. [Benchmarks](Docs/Benchmarks.md) reports latency and memory measured on
+physical Apple hardware. [Testing](Docs/Testing.md) explains how to run checks
+and reproduce measurements;
 [Troubleshooting](Docs/Troubleshooting.md) covers assets, lifecycle and scores.
 GitHub-hosted validation is optional; no workflow is required or automatically run.
 
@@ -158,7 +152,7 @@ GitHub-hosted validation is optional; no workflow is required or automatically r
 - [UCI](Docs/UCI.md): options and supported protocol
 - [Testing](Docs/Testing.md): local and device validation
 - [Provenance](Docs/Provenance.md), [Updating Maia](Docs/UpdatingMaia.md): upstream/assets
-- [Future features](Docs/FutureFeatures.md): optional model and product directions
+- [Benchmarks](Docs/Benchmarks.md): physical hardware, latency, memory and methodology
 
 ## Licensing
 
@@ -168,4 +162,4 @@ and separately provisioned model. See [LICENSE](LICENSE),
 ONNX Runtime and SwiftChessTools retain their MIT licenses. This is independent
 work, not an official CSSLab or Mobile Maia release. Preserve the source/model
 licenses and their corresponding-source obligations when distributing derived
-packages or applications. App Store distribution is separate product work.
+packages or applications.

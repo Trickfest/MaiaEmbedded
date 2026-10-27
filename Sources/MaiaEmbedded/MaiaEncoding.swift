@@ -4,6 +4,8 @@ import ChessCore
 import CryptoKit
 import Foundation
 
+/// Validated tensor data and rules-derived metadata consumed by native inference.
+/// Token bytes also form the independent reference-fixture checksum.
 package struct MaiaInput: Sendable {
     package let tokens: [Float]
     package let legalMoves: [String]
@@ -15,6 +17,8 @@ package struct MaiaInput: Sendable {
     }
 }
 
+/// Adapts legal recorded positions to the pinned Maia-3 board and move vocabulary.
+/// Keep fixture byte hashes authoritative when changing layout or orientation.
 package enum MaiaEncoding {
     package static func prepare(_ request: MaiaRequest) throws -> MaiaInput {
         do { return try encode(request) }
@@ -39,9 +43,15 @@ package enum MaiaEncoding {
             }
         }
         let boards = request.useHistory ? Array(history.suffix(8)) : [game.position]
+        // The model consumes eight slots: pad the earliest retained board, then
+        // append recorded boards in chronological order. Current-only mode uses
+        // the final board for every slot.
         let padded = Array(repeating: boards[0], count: 8 - boards.count) + boards
         var tokens = [Float](repeating: 0, count: 64 * 97)
         let kinds: [PieceKind] = [.pawn, .knight, .bishop, .rook, .queen, .king]
+        // Square-major [64, 97] FP32 layout: each history slot uses twelve piece
+        // channels. Orient each board to its own side to move, as the pinned
+        // tokenizer does; move-vocabulary mirroring uses the final board's turn.
         for (h, board) in padded.enumerated() {
             let black = board.state.turn == .black
             for (square, piece) in board.board.enumeratedPieces() {
@@ -63,6 +73,8 @@ package enum MaiaEncoding {
                                    terminal: game.status.outcome != nil, blackToMove: game.position.state.turn == .black, terminalOutcome: terminalOutcome)
     }
 
+    /// Maps a legal move into 4,096 from/to entries or 256 promotion entries.
+    /// The queen/rook/bishop/knight ordering is part of checkpoint compatibility.
     package static func moveIndex(_ uci: String, blackToMove: Bool) throws -> Int {
         let move = try Move(string: uci)
         let fromRank = blackToMove ? 7 - move.from.rank : move.from.rank
