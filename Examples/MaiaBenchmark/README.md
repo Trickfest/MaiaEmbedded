@@ -1,25 +1,21 @@
-# Native Maia benchmark
+# Native Maia reference harness
 
-One SwiftUI app for iPhone, iPad, and Mac, sharing the same Swift prediction and
-benchmark code as the native Mac CLI. No XCTest UI target or UI automation is
-required. Download the pinned model with `Scripts/download-model.sh` from the
-repository root, then open `MaiaBenchmark.xcodeproj`.
+One SwiftUI app for iPhone, iPad and Mac. Download the pinned model with
+`Scripts/download-model.sh`, then open `MaiaBenchmark.xcodeproj`.
 
-The project copies the local model into the bundle. Run **Checks & Benchmark**
-for upstream reference checks and warm timing, or **20-Minute Session** for the
-paced sustained run. **Cancel** suppresses results after native inference
-returns; backgrounding also cancels. Export completed JSON reports with the
-share control. These operations remain fully offline.
+**Check Swift API & UCI** verifies the reference corpus, shows move probabilities
+at two ratings from one loaded session, and verifies UCI moves/stop/restart.
+**Run Checks & Benchmark** measures correctness/latency; **20-Minute Session**
+uses the original paced sustained workload. Cancel/background suppresses the
+current result and permits a fresh run after cleanup. All inference is offline.
 
-For unattended simulator runs, launch with `--autorun --iterations 100 --duration
-30`. The JSON goes to the app's Documents/maia-benchmark.json. A completed report
-must have the expected start/completion timestamps; an old file is not evidence
-that a later run succeeded.
+Launch with `--package-checks` to write Documents/maia-validation.json, or
+`--autorun --iterations 100 --duration 30` for Documents/maia-benchmark.json.
+Export completed reports with their share controls. A current completion timestamp
+and successful checks are required; installation or a stale report is not evidence.
+No XCTest UI target or UI automation is involved.
 
-Physical-device signing uses an ignored `Configurations/Signing.local.xcconfig`;
-copy the adjacent example and set your own DEVELOPMENT_TEAM and unique bundle
-prefix. The shared scheme runs Release builds. No team ID or UDID is tracked.
-
-Mobile physical acceptance is pending. Simulator reports identify themselves and
-cannot substitute for iPhone/iPad runtime, memory, thermal, or lifecycle testing.
-See [Validation](../../Docs/Validation.md).
+Physical signing uses the ignored Configurations/Signing.local.xcconfig, copied
+from its example. Shared configuration includes no personal team ID or UDID.
+Original physical feasibility passed; final package/device verification is a
+separate gate. See [Testing](../../Docs/Testing.md) and [Examples](../../Docs/Examples.md).

@@ -1,0 +1,59 @@
+{
+  "coldLoadSeconds" : 0.39030854165321216,
+  "coldTargetMet" : true,
+  "completedAt" : "2026-10-27T00:50:07Z",
+  "correctnessCases" : 20,
+  "firstPredictionSeconds" : 0.01916804164648056,
+  "footprintAfterLoadBytes" : 472597704,
+  "footprintAfterUnloadBytes" : 176686136,
+  "footprintBeforeLoadBytes" : 13877944,
+  "hardware" : "iPad16,5",
+  "isSimulator" : false,
+  "kernelMemoryBudgetMet" : true,
+  "kernelPeakFootprintBytes" : 792757664,
+  "maxLogitError" : 2.288818359375e-05,
+  "maxProbabilityError" : 4.948778157154443e-06,
+  "memoryBudgetMiB" : 1024,
+  "modelSHA256" : "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "notes" : [
+    "MaiaSession direct API; MaiaUCI uses the same pinned inference core.",
+    "Footprint peak is sampled between operations; allocations within an inference may be higher.",
+    "Background\/resume and user-visible responsiveness require a later manual device check.",
+    "Memory budget is an explicit experiment budget, not an OS process limit.",
+    "Cold means the first session in this process; filesystem caches were not evicted.",
+    "Kernel high-water metrics include transient allocations and the full process lifetime."
+  ],
+  "os" : "Version 27.0.1 (Build 24A446)",
+  "peakResidentBytes" : 834502656,
+  "platform" : "iOS\/iPadOS",
+  "preCanceledRequestRejected" : true,
+  "reloadCycles" : 2,
+  "reloadLoadedFootprints" : [
+    436045096,
+    427492600
+  ],
+  "reloadUnloadedFootprints" : [
+    164594816,
+    168821912
+  ],
+  "runtime" : "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization",
+  "sampledMemoryBudgetMet" : true,
+  "sampledPeakFootprintBytes" : 475940040,
+  "schemaVersion" : 1,
+  "startedAt" : "2026-10-27T00:49:34Z",
+  "sustainedFinalFootprintBytes" : 462996680,
+  "sustainedFirstP95Seconds" : 0.03982879163231701,
+  "sustainedInitialFootprintBytes" : 474449096,
+  "sustainedLastP95Seconds" : 0.039862749981693923,
+  "sustainedMemoryGrowthWithin64MiB" : true,
+  "sustainedPredictions" : 212,
+  "sustainedSeconds" : 30.13877520832466,
+  "thermalStates" : [
+    0
+  ],
+  "twoRatingSeconds" : 0.02835029165726155,
+  "warmIterations" : 100,
+  "warmMedianSeconds" : 0.014287250000052154,
+  "warmP95Seconds" : 0.014508708321955055,
+  "warmTargetMet" : true
+}

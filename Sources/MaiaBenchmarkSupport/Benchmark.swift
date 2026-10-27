@@ -16,8 +16,8 @@ public struct ReferenceCase: Codable, Sendable {
     public let logits: [String: Float]
     public let probabilities: [String: Double]
     public let valueLogits: [Float]
-    public var request: MaiaExperimentRequest {
-        MaiaExperimentRequest(initialFEN: initialFEN, moves: moves, useHistory: useHistory,
+    public var request: MaiaRequest {
+        MaiaRequest(initialFEN: initialFEN, moves: moves, useHistory: useHistory,
                               selfRating: selfRating, opponentRating: opponentRating)
     }
 }
@@ -31,12 +31,12 @@ public struct ReferenceCorpus: Codable, Sendable {
     public let cases: [ReferenceCase]
     public static func load() throws -> Self {
         guard let url = Bundle.module.url(forResource: "reference", withExtension: "json") else {
-            throw MaiaExperimentError.invalidRequest("Reference corpus missing.")
+            throw MaiaError.invalidRequest("Reference corpus missing.")
         }
         let corpus = try JSONDecoder().decode(Self.self, from: Data(contentsOf: url))
-        guard corpus.schemaVersion == 1, corpus.modelSHA256 == MaiaExperimentSession.modelSHA256,
+        guard corpus.schemaVersion == 1, corpus.modelSHA256 == MaiaSession.modelSHA256,
               corpus.cases.contains(where: { !$0.terminal }) else {
-            throw MaiaExperimentError.invalidRequest("Reference corpus/model identity mismatch.")
+            throw MaiaError.invalidRequest("Reference corpus/model identity mismatch.")
         }
         return corpus
     }
@@ -50,7 +50,7 @@ public struct BenchmarkReport: Codable, Sendable {
     public var platform = ""
     public var isSimulator = false
     public var hardware = ""
-    public var modelSHA256 = MaiaExperimentSession.modelSHA256
+    public var modelSHA256 = MaiaSession.modelSHA256
     public var runtime = "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization"
     public var coldLoadSeconds = 0.0
     public var firstPredictionSeconds = 0.0
@@ -116,7 +116,7 @@ public enum MaiaBenchmark {
                 result == KERN_SUCCESS ? UInt64(max(0, info.ledger_phys_footprint_peak)) : 0,
                 basicResult == KERN_SUCCESS ? basic.resident_size_max : 0)
     }
-    private static func hardware() -> String {
+    static func hardware() -> String {
         var size = 0
         sysctlbyname("hw.machine", nil, &size, nil, 0)
         var value = [CChar](repeating: 0, count: size)
@@ -129,24 +129,24 @@ public enum MaiaBenchmark {
         return sorted[max(0, min(sorted.count - 1, Int(ceil(Double(sorted.count) * fraction)) - 1))]
     }
 
-    public static func check(_ fixture: ReferenceCase, prediction: MaiaExperimentPrediction,
+    public static func check(_ fixture: ReferenceCase, prediction: MaiaPrediction,
                              corpus: ReferenceCorpus) throws -> (Double, Double) {
-        let input = try MaiaExperimentEncoding.prepare(fixture.request)
+        let input = try MaiaEncoding.prepare(fixture.request)
         guard input.tokenSHA256 == fixture.tokenSHA256,
               input.legalMoves == fixture.legalMoves, input.terminal == fixture.terminal,
               prediction.terminal == fixture.terminal else {
-            throw MaiaExperimentError.invalidRequest("Encoding, legality, or terminal mismatch: \(fixture.id)")
+            throw MaiaError.invalidRequest("Encoding, legality, or terminal mismatch: \(fixture.id)")
         }
         if fixture.terminal {
             guard prediction.probabilities.isEmpty, prediction.valueLogits.isEmpty else {
-                throw MaiaExperimentError.invalidRequest("Terminal position produced predictions: \(fixture.id)")
+                throw MaiaError.invalidRequest("Terminal position produced predictions: \(fixture.id)")
             }
             return (0, 0)
         }
         guard Set(prediction.logits.keys) == Set(fixture.logits.keys),
               Set(prediction.probabilities.keys) == Set(fixture.probabilities.keys),
               prediction.valueLogits.count == fixture.valueLogits.count else {
-            throw MaiaExperimentError.invalidRequest("Prediction schema mismatch: \(fixture.id)")
+            throw MaiaError.invalidRequest("Prediction schema mismatch: \(fixture.id)")
         }
         var logitError = zip(prediction.valueLogits, fixture.valueLogits).map { abs(Double($0 - $1)) }.max() ?? 0
         var probabilityError = 0.0
@@ -158,7 +158,7 @@ public enum MaiaBenchmark {
               logitError <= corpus.logitTolerance, probabilityError <= corpus.probabilityTolerance,
               abs(prediction.probabilities.values.reduce(0, +) - 1) < 1e-6,
               abs(prediction.outcomeProbabilities.reduce(0, +) - 1) < 1e-6 else {
-            throw MaiaExperimentError.invalidRequest("Numerical mismatch: \(fixture.id); logits=\(logitError), probabilities=\(probabilityError)")
+            throw MaiaError.invalidRequest("Numerical mismatch: \(fixture.id); logits=\(logitError), probabilities=\(probabilityError)")
         }
         return (logitError, probabilityError)
     }
@@ -169,7 +169,7 @@ public enum MaiaBenchmark {
                            memoryBudgetMiB: Int = 1024,
                            progress: @Sendable (String) -> Void = { _ in }) async throws -> BenchmarkReport {
         guard iterations > 0, sustainedSeconds >= 0, sustainedSeconds.isFinite, memoryBudgetMiB > 0 else {
-            throw MaiaExperimentError.invalidRequest("Invalid benchmark configuration.")
+            throw MaiaError.invalidRequest("Invalid benchmark configuration.")
         }
         let corpus = try ReferenceCorpus.load()
         var report = BenchmarkReport()
@@ -183,17 +183,17 @@ public enum MaiaBenchmark {
         #else
         report.platform = "iOS/iPadOS"
         #endif
-        report.notes = ["Experimental API; no UCI implementation.",
+        report.notes = ["MaiaSession direct API; MaiaUCI uses the same pinned inference core.",
                         "Footprint peak is sampled between operations; allocations within an inference may be higher.",
                         "Background/resume and user-visible responsiveness require a later manual device check.",
                         "Memory budget is an explicit experiment budget, not an OS process limit.",
                         "Cold means the first session in this process; filesystem caches were not evicted.",
                         "Kernel high-water metrics include transient allocations and the full process lifetime."]
         if report.isSimulator { report.notes.append("Simulator performance is host-Mac performance, not physical mobile-device evidence.") }
-        let session = MaiaExperimentSession()
+        let session = MaiaSession(configuration: .init(modelURL: modelURL))
         report.footprintBeforeLoadBytes = footprint()
         let loadStart = ProcessInfo.processInfo.systemUptime
-        try await session.load(modelURL: modelURL)
+        try await session.prepare()
         report.coldLoadSeconds = ProcessInfo.processInfo.systemUptime - loadStart
         report.footprintAfterLoadBytes = footprint()
         report.sampledPeakFootprintBytes = max(report.footprintBeforeLoadBytes, report.footprintAfterLoadBytes)
@@ -258,7 +258,7 @@ public enum MaiaBenchmark {
         report.sustainedFirstP95Seconds = percentile(Array(sustainedTimes.prefix(window)), 0.95)
         report.sustainedLastP95Seconds = percentile(Array(sustainedTimes.suffix(window)), 0.95)
         // A task canceled before inference starts must never return a prediction.
-        let canceled = Task { () throws -> MaiaExperimentPrediction in
+        let canceled = Task { () throws -> MaiaPrediction in
             withUnsafeCurrentTask { $0?.cancel() }
             return try await session.predict(first.request)
         }
@@ -267,7 +267,7 @@ public enum MaiaBenchmark {
         await session.unload()
         report.footprintAfterUnloadBytes = footprint()
         for _ in 0..<2 {
-            try await session.load(modelURL: modelURL)
+            try await session.prepare()
             _ = try await session.predict(first.request)
             let loadedFootprint = footprint()
             report.sampledPeakFootprintBytes = max(report.sampledPeakFootprintBytes, loadedFootprint)

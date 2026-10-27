@@ -1,0 +1,59 @@
+{
+  "coldLoadSeconds" : 0.36380045814439654,
+  "coldTargetMet" : true,
+  "completedAt" : "2026-10-26T21:07:13Z",
+  "correctnessCases" : 20,
+  "firstPredictionSeconds" : 0.014143750071525574,
+  "footprintAfterLoadBytes" : 791807368,
+  "footprintAfterUnloadBytes" : 717768120,
+  "footprintBeforeLoadBytes" : 4096648,
+  "hardware" : "arm64",
+  "isSimulator" : false,
+  "kernelMemoryBudgetMet" : true,
+  "kernelPeakFootprintBytes" : 796362168,
+  "maxLogitError" : 2.09808349609375e-05,
+  "maxProbabilityError" : 4.680760009589946e-06,
+  "memoryBudgetMiB" : 1024,
+  "modelSHA256" : "3454b03ae78baa64a87b345fdb1a457265d912caec531039b074f07eda0d8010",
+  "notes" : [
+    "MaiaSession direct API; MaiaUCI uses the same pinned inference core.",
+    "Footprint peak is sampled between operations; allocations within an inference may be higher.",
+    "Background\/resume and user-visible responsiveness require a later manual device check.",
+    "Memory budget is an explicit experiment budget, not an OS process limit.",
+    "Cold means the first session in this process; filesystem caches were not evicted.",
+    "Kernel high-water metrics include transient allocations and the full process lifetime."
+  ],
+  "os" : "Version 27.0.1 (Build 26A434)",
+  "peakResidentBytes" : 832241664,
+  "platform" : "macOS",
+  "preCanceledRequestRejected" : true,
+  "reloadCycles" : 2,
+  "reloadLoadedFootprints" : [
+    748750264,
+    749356472
+  ],
+  "reloadUnloadedFootprints" : [
+    748733880,
+    749340088
+  ],
+  "runtime" : "ONNX Runtime 1.24.2 CPU; FP32; 2 intra-op threads; basic graph optimization",
+  "sampledMemoryBudgetMet" : true,
+  "sampledPeakFootprintBytes" : 796362168,
+  "schemaVersion" : 1,
+  "startedAt" : "2026-10-26T21:06:40Z",
+  "sustainedFinalFootprintBytes" : 717784504,
+  "sustainedFirstP95Seconds" : 0.025537292007356882,
+  "sustainedInitialFootprintBytes" : 793937312,
+  "sustainedLastP95Seconds" : 0.026646375190466642,
+  "sustainedMemoryGrowthWithin64MiB" : true,
+  "sustainedPredictions" : 238,
+  "sustainedSeconds" : 30.09044783329591,
+  "thermalStates" : [
+    0
+  ],
+  "twoRatingSeconds" : 0.029102500062435865,
+  "warmIterations" : 100,
+  "warmMedianSeconds" : 0.016757333651185036,
+  "warmP95Seconds" : 0.01724695833399892,
+  "warmTargetMet" : true
+}

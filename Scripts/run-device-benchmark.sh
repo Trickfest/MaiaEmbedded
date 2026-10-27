@@ -4,6 +4,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 device_id="${1:?Usage: run-device-benchmark.sh DEVICE_IDENTIFIER [duration-seconds]}"
 device_duration="${2:-1200}"
+device_mode="${3:---autorun}"
+case "$device_mode" in
+    --autorun) launch_arguments=(--autorun --iterations 100 --duration "$device_duration") ;;
+    --package-checks) launch_arguments=(--package-checks) ;;
+    *) printf '%s\n' 'Mode must be --autorun or --package-checks.' >&2; exit 2 ;;
+esac
 [[ -f Examples/MaiaBenchmark/Configurations/Signing.local.xcconfig ]] || {
     printf '%s\n' 'Create the ignored local signing configuration described in Examples/MaiaBenchmark/README.md first.' >&2
     exit 1
@@ -21,5 +27,5 @@ app_path=".build/xcode-device-signed/Build/Products/Release-iphoneos/MaiaBenchma
 bundle_id="$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app_path/Info.plist")"
 xcrun devicectl device install app --device "$device_id" "$app_path"
 xcrun devicectl device process launch --device "$device_id" --terminate-existing \
-    "$bundle_id" -- --autorun --iterations 100 --duration "$device_duration"
+    "$bundle_id" -- "${launch_arguments[@]}"
 printf '%s\n' 'Keep the app foreground and the device unlocked until completion, then export its JSON report.'

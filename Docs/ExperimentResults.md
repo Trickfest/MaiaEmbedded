@@ -52,7 +52,7 @@ return to startup is not promised.
 
 ## Correctness and reproducibility
 
-- Seven non-UI Swift Testing tests pass: reference encoding/legality/terminal
+- The original experiment passed seven non-UI Swift Testing tests: reference encoding/legality/terminal
   status, illegal input, malformed FEN/broken model, promotion vocabulary,
   stable softmax, unloaded inference, and pre-cancellation behavior.
 - Input FP32 tensor bytes match upstream hashes exactly for all 20 cases.
@@ -132,18 +132,13 @@ This is direct user-reported manual evidence, not an automated UI test or an
 independent log reconstruction of those actions. It closes the remaining
 lifecycle portion of the feasibility experiment on these devices.
 
-## Next work
+## Relationship to the package
 
-The model feasibility experiment has passed on the tested Mac, iPad and iPhone,
-including the user-reported mobile lifecycle checks. Proceed to package/model
-integration and the production direct Swift API design. Sampling, UCI and
-SwiftChessDemo integration remain later work. The experimental API is not yet
-production ready.
-
-The harness and benchmark evidence were committed locally as `c4d2e3d`.
-The subsequent manual lifecycle record is direct user-reported evidence.
-Commit/push synchronization is tracked in Git; no tag/release or public visibility
-change is part of this experiment.
+These are historical feasibility results for the experimental baseline. The
+native API, sampling and UCI package work builds on that same pinned inference
+core. Current validation and the separate final integration/device gate are in
+[Testing](Testing.md). Do not treat these original device reports as verification
+of later consumer or UCI changes. No release/public visibility change is implied.
 
 ## Evidence
 

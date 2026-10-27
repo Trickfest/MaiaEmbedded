@@ -1,60 +1,88 @@
 # Architecture
 
-Status: the direct inference experiment is implemented; production API and UCI
-adapter remain proposed. The experimental API must not be treated as stable.
-
 ```text
-Native Swift app          UCI consumer
-       |                       |
-       |                    MaiaUCI
-       |                       |
-       +------ MaiaEmbedded ---+
-                       |
-             Encoding and inference
-                       |
-             Runtime + local model
+Native Swift app         UCI consumer / maia-uci
+       |                         |
+       |                     MaiaUCI
+       +----- MaiaEmbedded ------+
+                      |
+            ChessCore + ONNX Runtime
+                      |
+             Caller-owned local model
 ```
 
-## Direct API
+## Modules and source organization
 
-Separate prediction from move selection. Prediction should expose legal-move
-probabilities and supported human-game outcome predictions. Selection should
-apply temperature/Top-P to a prediction without confusing adjusted sampling
-probabilities with the model's base distribution.
+`Sources/MaiaEmbedded` holds configuration, requests, encoding, predictions,
+sampling and session ownership in separate Swift files. `Sources/MaiaUCI`
+holds the instance-owned adapter. `MaiaCLI` is a thin stdin/stdout host;
+`MaiaSmoke` and `MaiaSoak` share checks in `MaiaBenchmarkSupport`. The support
+module and native example own measurements/reports; the engine core has no UI,
+clocks, game storage or networking. Public module catalogs provide Xcode DocC.
 
-Requests will include a validated position, optional validated history, and
-side-to-move/opponent ratings. Design async loading and inference, reproducible
-sampling, typed errors, cancellation/stale-result suppression, and explicit
-load/unload/shutdown. Reuse one loaded model for sequential rating comparisons.
-Current `MaiaExperiment*` names/types are provisional. The actor-based session
-implements verified loading, validated replay/encoding, prediction and unload.
-FP32 softmax is applied only over legal moves; value outcomes are separate.
-Objective-C temporary lifetimes are scoped per operation using autorelease pools.
-Cancellation is checked before and after inference; native kernels are not
-forcibly interrupted. Final API and sampling follow physical-device acceptance.
+ChessCore supplies semantic FEN validation, move replay, legality and outcomes.
+ONNX types stay internal. Preserve the sibling SwiftChessTools path dependency.
+CPU FP32, basic graph optimization and two intra-op threads are the measured
+default. Threads may be configured from 1 through 16 before session creation;
+other settings/model sizes/providers require separate measurement.
 
-## UCI adapter
+## Direct API contracts
 
-Wrap the direct API. Follow a pinned upstream Maia-3 implementation for options
-such as Elo, SelfElo, OppoElo, Temperature, TopP, and MultiPV, with deviations
-explicitly documented. Define readiness, history reconstruction, stopping,
-new-game/reset, and shutdown; ensure old requests cannot emit into new positions.
-Specify the handling of clock limits, depth/nodes, searchmoves, infinite analysis,
-and pondering before claiming support. Do not fake search depth or translate
-move likelihood into a centipawn evaluation. Any WDL-derived compatibility score
-must be identified as a human-game outcome estimate.
+`MaiaConfiguration` accepts a local model URL. `MaiaSession.prepare()` validates
+configuration, size, SHA-256 and tensor names, then retains one runtime session.
+It is idempotent. `unload()` clears it and allows another prepare; create a new
+session to change configuration/model URL. No implicit model acquisition occurs.
 
-The in-process adapter uses instance-owned command state and ordered output.
-A later macOS executable can adapt that same layer to stdin/stdout; Apple mobile
-apps use it in process. No subprocess-based Python runtime is planned.
+`MaiaRequest` contains the initial six-field FEN, coordinate UCI moves, history
+mode and side-to-move/opponent ratings. Both ratings default to 1600 and must
+be 600...2600. These are human Lichess conditioning levels, not calibrated
+playing-strength guarantees. FEN input is limited to 1024 UTF-8 bytes, history
+to 20,000 moves; every supplied move is legally replayed. Validation does not
+prove historical reachability of a FEN.
 
-## Dependencies and ownership
+History mode uses the last eight replayed positions and pads a short line with
+its earliest position. Current-only mode repeats the final board. Earlier
+history cannot be inferred from a standalone FEN. Encoding mirrors Black's
+ranks/colors per history board, matches the pinned 64×97 tensor and 4352-entry
+move vocabulary, and masks policy logits to legal moves.
 
-The experiment uses pinned ONNX Runtime 1.24.2 CPU inference; benchmark acceleration if
-needed rather than assuming Core ML or Neural Engine acceleration works. Keep
-runtime types internal. Model identity and encoding must match the checkpoint.
+`MaiaPrediction` exposes original legal logits/probabilities, stable likelihood
+ranking and a loss/draw/win human-game outcome distribution relative to the side
+to move. The value head predicts outcomes of human games; it is not searched
+position evaluation. Terminal ChessCore outcomes return an empty policy and
+known outcome without native inference. Preparation is still required. Claims,
+resignation, timeout and history before the supplied root are caller-owned.
 
-The experiment uses ChessCore for rules, legality, FEN, and replay.
-Preserve the sibling SwiftChessTools path during development. ChessUCI stays a
-formatting/parsing helper, not an engine scheduler. UI, clocks, persisted games,
-review/training workflows, and board transport belong to consuming apps.
+`MaiaSampler` separates selection from prediction. Temperature 0 gives stable
+argmax; otherwise it rescales logits, restricts to an optional legal-move
+intersection and applies TopP. TopP follows the pinned upstream convention:
+retain cumulative probabilities **<= TopP**, retaining at least one move;
+TopP=1 keeps all. Thus it can exclude the candidate crossing the threshold.
+Temperature must be finite in 0...5; TopP finite in (0,1]. Original probabilities
+are preserved; `selectionProbabilities` contains the adjusted distribution.
+An empty nonterminal intersection throws. Terminal selection returns nil.
+
+A provided seed is reproducible per call using SplitMix64. Use the generic
+`using:` overload with a retained generator for a reproducible series. Sampling
+reproducibility assumes identical logits; floating-point inference differences
+near boundaries can change choices across platforms.
+
+## Ownership, cancellation and errors
+
+Actor isolation serializes load/predict/unload. Native calls do not suspend;
+unload waits behind work already executing. Temporary Objective-C allocations
+are scoped per operation. A canceled Swift task throws `CancellationError` at
+checkpoints before/after work; native kernels are not forcibly terminated.
+Callers should invalidate old request identities when a screen or position
+changes, cancel its task and observe completion before reusing UI results.
+
+`MaiaError` distinguishes invalid requests, missing/incompatible models,
+unprepared sessions and runtime failures. Error details are diagnostic text,
+not a stable parser format. Failed preparation leaves the session unloaded;
+fix the asset and retry. Serialized calls on one session reuse its weights;
+independent instances each consume substantial memory.
+
+The UCI adapter adds request/instance identities and ordered callbacks around
+this same API. See [UCI](UCI.md) for restart, readiness and stop semantics. The
+Demo's shared lifecycle coordinator also awaits Maia cleanup before creating a
+replacement transport, avoiding overlapping model loads during engine switches.

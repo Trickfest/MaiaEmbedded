@@ -4,6 +4,8 @@ import MaiaBenchmarkSupport
 
 @MainActor @Observable final class BenchmarkModel {
     var status = "Ready. Run the reference checks and CPU benchmark on this device."
+    var packageReport: MaiaPackageReport?
+    var packageReportURL: URL?
     var report: BenchmarkReport?
     var running = false
     var reportURL: URL?
@@ -46,6 +48,36 @@ import MaiaBenchmarkSupport
             if generation == runID { running = false }
         }
     }
+    func checkPackage() {
+        guard !running else { return }
+        let runID = UUID(); generation = runID; running = true
+        packageReport = nil; packageReportURL = nil
+        status = "Checking the direct API, two ratings, UCI, stop and restart…"
+        task = Task {
+            do {
+                guard let url = Bundle.main.url(forResource: "maia3-79m", withExtension: "onnx") else {
+                    throw CocoaError(.fileNoSuchFile)
+                }
+                let result = try await MaiaPackageChecks.run(modelURL: url)
+                try Task.checkCancellation()
+                guard generation == runID else { return }
+                let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                let reportURL = documents.appendingPathComponent("maia-validation.json")
+                try result.write(to: reportURL)
+                packageReport = result; packageReportURL = reportURL
+                status = "API and UCI checks passed. Two rating predictions used one loaded model."
+                print("MAIA_PACKAGE_COMPLETE: \(reportURL.lastPathComponent)")
+            } catch is CancellationError {
+                if generation == runID { status = "Canceled. No new package report was produced." }
+            } catch {
+                if generation == runID {
+                    status = "Failed: \(error.localizedDescription)"
+                    print("MAIA_PACKAGE_FAILED: \(error.localizedDescription)")
+                }
+            }
+            if generation == runID { running = false }
+        }
+    }
     func cancel() {
         task?.cancel()
         // Keep running true until the current native operation returns, so a
@@ -61,10 +93,21 @@ import MaiaBenchmarkSupport
         WindowGroup {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Maia 79M Experiment").font(.largeTitle)
+                    Text("Maia Embedded").font(.largeTitle)
                     Text("Native CPU inference · FP32 · iPhone, iPad and Mac").foregroundStyle(.secondary)
                     Text(model.status).textSelection(.enabled)
                     if model.running { ProgressView() }
+                    Button("Check Swift API & UCI") { model.checkPackage() }.disabled(model.running)
+                    if let package = model.packageReport {
+                        ForEach(package.ratings.indices, id: \.self) { index in
+                            let preview = package.ratings[index]
+                            Text("Side to move \(preview.rating) · opponent \(preview.opponentRating)").font(.headline)
+                            Text(preview.moves.map { "\($0): \(Int(((preview.probabilities[$0] ?? 0) * 100).rounded()))%" }.joined(separator: " · "))
+                            Text("Sampled move: \(preview.selectedMove ?? "none")").font(.caption)
+                        }
+                        Text("These percentages predict human choices; they are not engine evaluations.").font(.caption)
+                        if let url = model.packageReportURL { ShareLink("Export API/UCI Report", item: url) }
+                    }
                     HStack {
                         Button("Run Checks & Benchmark") { model.start() }.disabled(model.running)
                         Button("Run 20-Minute Session") { model.start(duration: 1200) }.disabled(model.running)
@@ -82,7 +125,7 @@ import MaiaBenchmarkSupport
                         if let url = model.reportURL { ShareLink("Export JSON Report", item: url) }
                     }
                     Divider()
-                    Text("The model is bundled for offline testing. This is a feasibility harness, not a chess-playing app. Foreground sessions pause by cancellation when the app enters the background. Physical-device results are required before claiming mobile performance.")
+                    Text("The model is bundled for offline testing. This reference harness exercises the package without a game UI. Foreground sessions pause by cancellation when the app enters the background. Physical-device results are required before claiming mobile performance.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }.padding(24).frame(maxWidth: 800, alignment: .leading)
             }
@@ -91,7 +134,9 @@ import MaiaBenchmarkSupport
                 #if os(iOS)
                 UIApplication.shared.isIdleTimerDisabled = true
                 #endif
-                if CommandLine.arguments.contains("--autorun") {
+                if CommandLine.arguments.contains("--package-checks") {
+                    model.checkPackage()
+                } else if CommandLine.arguments.contains("--autorun") {
                     func argument(_ name: String, fallback: String) -> String {
                         let args = CommandLine.arguments
                         guard let i = args.firstIndex(of: name), i + 1 < args.count else { return fallback }
